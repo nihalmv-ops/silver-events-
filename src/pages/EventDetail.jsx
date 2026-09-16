@@ -22,6 +22,7 @@ import {
   Sparkles,
   Layers,
   Building2,
+  ExternalLink,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -538,6 +539,106 @@ export function EventDetail() {
             </Card>
           </div>
 
+          {/* Assigned Daily Catering Menu */}
+          <Card className="overflow-hidden border border-[#e2e8f0]">
+            <CardHeader className="bg-[#f8fafc]/50 border-b border-[#f1f5f9] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#163324] text-[#d4af37] flex items-center justify-center">
+                    <UtensilsCrossed className="w-4 h-4" />
+                  </div>
+                  <CardTitle className="text-base">
+                    Day {currentDayData.dayNumber} Assigned Catering Menu
+                  </CardTitle>
+                </div>
+                <CardDescription className="mt-1">
+                  Dishes and beverages configured for {formatNumber(currentDayData.expectedGuests)} expected guests on {currentDayData.dayLabel}
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<ExternalLink className="w-3.5 h-3.5 text-[#9d8050]" />}
+                onClick={() =>
+                  navigate('/catering-menu', {
+                    state: {
+                      selectedEventId: event.id,
+                      selectedDay: currentDayData.dayNumber,
+                    },
+                  })
+                }
+              >
+                Manage in Catering Planning
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              {currentDayData.menu && currentDayData.menu.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-[#f8fafc] border-b border-[#e2e8f0] text-xs font-semibold text-[#64748b] uppercase tracking-wider">
+                      <tr>
+                        <th className="px-5 py-3">Dish / Beverage Name</th>
+                        <th className="px-5 py-3">Category</th>
+                        <th className="px-5 py-3 text-right">Planned Quantity</th>
+                        <th className="px-5 py-3">Operational Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#f1f5f9]">
+                      {currentDayData.menu.map((dish) => (
+                        <tr key={dish.id} className="hover:bg-[#fbf6ed]/30 transition-colors">
+                          <td className="px-5 py-3.5 font-medium text-[#0f172a]">
+                            {dish.name}
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <Badge
+                              variant={
+                                dish.category === 'Non-Vegetarian'
+                                  ? 'danger'
+                                  : dish.category === 'Vegetarian'
+                                  ? 'success'
+                                  : 'secondary'
+                              }
+                              className="text-[11px]"
+                            >
+                              {dish.category}
+                            </Badge>
+                          </td>
+                          <td className="px-5 py-3.5 text-right font-sans font-bold text-[#163324]">
+                            {formatNumber(dish.quantity)} <span className="text-xs font-normal text-[#64748b]">{dish.unit}</span>
+                          </td>
+                          <td className="px-5 py-3.5 text-xs text-[#64748b]">
+                            {dish.notes || '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-8 text-center text-[#64748b] space-y-2">
+                  <UtensilsCrossed className="w-8 h-8 text-[#94a3b8] mx-auto opacity-60" />
+                  <p className="text-sm font-medium text-[#0f172a]">No Menu Items Assigned for Day {currentDayData.dayNumber}</p>
+                  <p className="text-xs">Configure dishes and water quotas in the Catering & Menu Management hub.</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() =>
+                      navigate('/catering-menu', {
+                        state: {
+                          selectedEventId: event.id,
+                          selectedDay: currentDayData.dayNumber,
+                        },
+                      })
+                    }
+                  >
+                    Assign Day {currentDayData.dayNumber} Menu
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Row: Expenses, Tasks, Pending & Notes */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* 10. Operational Expenses */}
@@ -696,3 +797,4 @@ export function EventDetail() {
     </div>
   )
 }
+

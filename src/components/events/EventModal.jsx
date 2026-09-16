@@ -372,3 +372,4 @@ export function EventModal({ isOpen, onClose, onSave, eventToEdit = null }) {
     </Modal>
   )
 }
+

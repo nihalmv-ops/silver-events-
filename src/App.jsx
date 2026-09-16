@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { EventProvider } from './context/EventContext'
+import { MenuProvider } from './context/MenuContext'
 import { AppRoutes } from './routes/AppRoutes'
 
 export function App() {
@@ -9,7 +10,9 @@ export function App() {
     <BrowserRouter>
       <AuthProvider>
         <EventProvider>
-          <AppRoutes />
+          <MenuProvider>
+            <AppRoutes />
+          </MenuProvider>
         </EventProvider>
       </AuthProvider>
     </BrowserRouter>

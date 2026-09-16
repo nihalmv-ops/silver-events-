@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 const EventContext = createContext(null)
 
-const STORAGE_KEY = 'silver_catering_events_data'
+const STORAGE_KEY = 'silver_catering_events_data_v4'
 
 // Realistic initial seed data featuring the 3-Day College Event (30,000 pax)
 const INITIAL_EVENTS = [
@@ -40,6 +40,24 @@ const INITIAL_EVENTS = [
         waterRemaining: 2200,
         counterStatus: 'OPEN',
         expenses: 124000,
+        menu: [
+          {
+            id: 'm-d1-1',
+            name: 'Chicken Biryani',
+            category: 'Non-Vegetarian',
+            unit: 'Pax',
+            quantity: 10000,
+            notes: 'Authentic Thalassery dum biriyani in 40 cauldrons with egg & fried onions',
+          },
+          {
+            id: 'm-d1-2',
+            name: 'Water Bottle',
+            category: 'Other',
+            unit: 'Bottles',
+            quantity: 10000,
+            notes: '250ml hygienic chilled sealed mineral drinking water bottles',
+          },
+        ],
         expensesBreakdown: [
           { item: 'Logistics Fleet & Diesel (4 trucks)', amount: 22000 },
           { item: 'Temporary Service Stewards (45 crew)', amount: 54000 },
@@ -66,8 +84,8 @@ const INITIAL_EVENTS = [
         dayLabel: 'Day 2 — Tech Expo & Grand Banquet',
         date: '2026-09-17',
         expectedGuests: 10000,
-        foodRequired: '10,000 Pax Malabar Dum Ghee Rice & Mutton Curry',
-        foodItem: 'Jeerakasala Ghee Rice, Nadan Mutton Roast & Dal Tadka',
+        foodRequired: '10,000 Pax Chicken Biryani',
+        foodItem: 'Chicken Biryani with Raitha, Pickle & Pappadam',
         foodPrepared: 10000,
         foodPacked: 2400,
         foodDelivered: 0,
@@ -78,30 +96,46 @@ const INITIAL_EVENTS = [
         waterRemaining: 8500,
         counterStatus: 'SCHEDULED',
         expenses: 138000,
+        menu: [
+          {
+            id: 'm-d2-1',
+            name: 'Chicken Biryani',
+            category: 'Non-Vegetarian',
+            unit: 'Pax',
+            quantity: 10000,
+            notes: 'Authentic Thalassery dum biriyani with aromatic spices and cashews',
+          },
+          {
+            id: 'm-d2-2',
+            name: 'Water Bottle',
+            category: 'Other',
+            unit: 'Bottles',
+            quantity: 10000,
+            notes: '250ml hygienic sealed mineral drinking water bottles',
+          },
+        ],
         expensesBreakdown: [
-          { item: 'Fresh Mutton Procurement (Halal certified)', amount: 68000 },
+          { item: 'Fresh Poultry Procurement (Halal certified)', amount: 68000 },
           { item: 'Logistics Transport & Fuel (Day 2)', amount: 20000 },
           { item: 'Temporary Crew Day 2 (45 crew)', amount: 50000 },
         ],
         tasks: [
           { id: 'd2-t1', title: 'Central Kitchen cauldrons fire-up at 04:30 AM', done: true },
-          { id: 'd2-t2', title: 'Mutton marination and slow-braising temperature check', done: true },
+          { id: 'd2-t2', title: 'Chicken marination and dum seal temperature check', done: true },
           { id: 'd2-t3', title: 'Morning transport convoy departure at 09:30 AM', done: false },
-          { id: 'd2-t4', title: 'Setup VIP lounge live dessert station (Palada Payasam)', done: false },
         ],
         pending: [
           { id: 'd2-p1', text: 'Confirm second refrigerated vehicle gate pass', urgency: 'high' },
-          { id: 'd2-p2', text: 'Pre-chill 10,000 water bottles at venue cold room', urgency: 'normal' },
         ],
-        notes: 'Pro-show evening schedule expects high student crowd. Service captains to coordinate rapid buffet replenishments.',
+        notes: 'Day 2 repeat biryani service with heightened demand during lunch break.',
       },
       {
         dayNumber: 3,
         dayLabel: 'Day 3 — Valedictory & Closing Feast',
         date: '2026-09-18',
         expectedGuests: 10000,
-        foodRequired: '10,000 Pax Indo-Chinese Fried Rice & Chilly Chicken Feast',
-        foodItem: 'Executive Fried Rice, Chilly Chicken Gravy & Veg Spring Rolls',
+        foodRequired: '10,000 Pax Chicken Biryani',
+        foodItem: 'Chicken Biryani with Raitha, Pickle & Pappadam',
         foodPrepared: 0,
         foodPacked: 0,
         foodDelivered: 0,
@@ -112,6 +146,24 @@ const INITIAL_EVENTS = [
         waterRemaining: 10000,
         counterStatus: 'PLANNED',
         expenses: 115000,
+        menu: [
+          {
+            id: 'm-d3-1',
+            name: 'Chicken Biryani',
+            category: 'Non-Vegetarian',
+            unit: 'Pax',
+            quantity: 10000,
+            notes: 'Closing feast Thalassery Chicken Biryani',
+          },
+          {
+            id: 'm-d3-2',
+            name: 'Water Bottle',
+            category: 'Other',
+            unit: 'Bottles',
+            quantity: 10000,
+            notes: '250ml chilled mineral water bottles',
+          },
+        ],
         expensesBreakdown: [
           { item: 'Poultry & Fresh Produce Supply', amount: 48000 },
           { item: 'Transport fleet & packing supplies', amount: 19000 },
@@ -119,13 +171,10 @@ const INITIAL_EVENTS = [
         ],
         tasks: [
           { id: 'd3-t1', title: 'Central kitchen batch scheduling review', done: false },
-          { id: 'd3-t2', title: 'Closing ceremony VIP high-tea arrangements', done: false },
-          { id: 'd3-t3', title: 'Final venue equipment pack-up & inventory recount', done: false },
+          { id: 'd3-t2', title: 'Closing ceremony buffet setup', done: false },
         ],
-        pending: [
-          { id: 'd3-p1', text: 'Return vehicle logistics schedule sign-off', urgency: 'normal' },
-        ],
-        notes: 'Closing ceremony buffet starts 1:30 PM followed by post-event equipment loading and inventory count.',
+        pending: [],
+        notes: 'Closing ceremony buffet starts 1:30 PM followed by post-event equipment loading.',
       },
     ],
   },
@@ -163,129 +212,36 @@ const INITIAL_EVENTS = [
         waterRemaining: 0,
         counterStatus: 'CLOSED',
         expenses: 68500,
-        expensesBreakdown: [
-          { item: 'Dry Ice & Ice Replenishment', amount: 9500 },
-          { item: 'Truck Transport & Tolls', amount: 8000 },
-          { item: 'Service Stewards & Banquet Captains', amount: 36000 },
-          { item: 'Banana Leaves & Floral Linens', amount: 15000 },
+        menu: [
+          {
+            id: 'm-w-1',
+            name: 'Chicken Biryani',
+            category: 'Non-Vegetarian',
+            unit: 'Pax',
+            quantity: 1450,
+            notes: 'Thalassery special',
+          },
+          {
+            id: 'm-w-2',
+            name: 'Nadan Mutton Roast',
+            category: 'Lunch',
+            unit: 'Pax',
+            quantity: 1450,
+            notes: 'Slow roasted with coconut chips',
+          },
+          {
+            id: 'm-w-3',
+            name: 'Water Bottle',
+            category: 'Other',
+            unit: 'Bottles',
+            quantity: 3000,
+            notes: 'Chilled bottles',
+          },
         ],
-        tasks: [
-          { id: 'w-t1', title: 'Dinner buffet setup at Grand Hyatt Lawns', done: true },
-          { id: 'w-t2', title: 'Live Appam & Stew counter staging', done: true },
-        ],
+        expensesBreakdown: [],
+        tasks: [],
         pending: [],
         notes: 'Flawlessly delivered. Client feedback 10/10.',
-      },
-    ],
-  },
-  {
-    id: 'evt-techmatrix-gala',
-    code: 'EVT-2026-0922',
-    name: 'TechMatrix Global Annual Banquet & Dinner',
-    type: 'Corporate Banquet',
-    clientName: 'Sneha Verma (HR Director)',
-    clientPhone: '+91 98950 44556',
-    clientEmail: 's.verma@techmatrix.com',
-    venue: 'Crowne Plaza Convention Center, Maradu',
-    startDate: '2026-09-22',
-    endDate: '2026-09-22',
-    numberOfDays: 1,
-    totalExpectedGuests: 450,
-    status: 'Upcoming',
-    statusVariant: 'gold',
-    cateringManager: 'Arun Varma',
-    days: [
-      {
-        dayNumber: 1,
-        dayLabel: 'Day 1 — Executive Multicuisine Gala',
-        date: '2026-09-22',
-        expectedGuests: 450,
-        foodRequired: '450 Pax Multicuisine Buffet',
-        foodItem: 'Continental Starters, Mughlai Biryani, Kerala Fish Curry',
-        foodPrepared: 0,
-        foodPacked: 0,
-        foodDelivered: 0,
-        foodRemaining: 450,
-        waterRequired: '1,000 Bottles',
-        waterTotalNumber: 1000,
-        waterDelivered: 0,
-        waterRemaining: 1000,
-        counterStatus: 'PLANNED',
-        expenses: 35000,
-        expensesBreakdown: [
-          { item: 'Corporate Buffet Utensils Staging', amount: 12000 },
-          { item: 'Uniformed Banquet Stewards (15 pax)', amount: 23000 },
-        ],
-        tasks: [
-          { id: 'c-t1', title: 'Confirm Crowne Plaza loading dock access timing', done: false },
-        ],
-        pending: [
-          { id: 'c-p1', text: 'Confirm dietary preferences (25 vegan pax)', urgency: 'normal' },
-        ],
-        notes: 'Corporate event with mocktail bar and plated dessert counter.',
-      },
-    ],
-  },
-  {
-    id: 'evt-sadhya-heritage',
-    code: 'EVT-2026-0925',
-    name: 'Malabar Heritage Traditional Wedding Sadhya',
-    type: 'Traditional Sadhya',
-    clientName: 'Sreedharan Nambiar',
-    clientPhone: '+91 97455 88990',
-    clientEmail: 'nambiar.family@gmail.com',
-    venue: 'Calicut Trade Centre, Kozhikode',
-    startDate: '2026-09-25',
-    endDate: '2026-09-26',
-    numberOfDays: 2,
-    totalExpectedGuests: 3500,
-    status: 'Upcoming',
-    statusVariant: 'gold',
-    cateringManager: 'Suresh Kumar',
-    days: [
-      {
-        dayNumber: 1,
-        dayLabel: 'Day 1 — Pre-wedding Feast',
-        date: '2026-09-25',
-        expectedGuests: 1500,
-        foodRequired: '1,500 Pax Biriyani & Snacks',
-        foodItem: 'Kozhikode Dum Biriyani & Sulaimani',
-        foodPrepared: 0,
-        foodPacked: 0,
-        foodDelivered: 0,
-        foodRemaining: 1500,
-        waterRequired: '3,000 Bottles',
-        waterTotalNumber: 3000,
-        waterDelivered: 0,
-        waterRemaining: 3000,
-        counterStatus: 'PLANNED',
-        expenses: 42000,
-        expensesBreakdown: [],
-        tasks: [],
-        pending: [],
-        notes: 'Pre-wedding informal dinner.',
-      },
-      {
-        dayNumber: 2,
-        dayLabel: 'Day 2 — 28-Dish Traditional Kerala Sadhya',
-        date: '2026-09-26',
-        expectedGuests: 2000,
-        foodRequired: '2,000 Pax Traditional Sadhya',
-        foodItem: 'Authentic 28-dish Kerala Sadhya on Fresh Plantain Leaves',
-        foodPrepared: 0,
-        foodPacked: 0,
-        foodDelivered: 0,
-        foodRemaining: 2000,
-        waterRequired: '4,500 Bottles',
-        waterTotalNumber: 4500,
-        waterDelivered: 0,
-        waterRemaining: 4500,
-        counterStatus: 'PLANNED',
-        expenses: 78000,
-        expensesBreakdown: [],
-        tasks: [],
-        pending: [],
-        notes: 'Traditional banana leaf sit-down dining in 4 successive rounds of 500 seats.',
       },
     ],
   },
@@ -332,7 +288,6 @@ export function EventProvider({ children }) {
       prev.map((evt) => {
         if (evt.id === id) {
           const merged = { ...evt, ...updatedFields }
-          // Update status variant if status changed
           if (updatedFields.status) {
             merged.statusVariant =
               updatedFields.status === 'Ongoing'
@@ -359,12 +314,116 @@ export function EventProvider({ children }) {
     [events]
   )
 
+  // Add menu item to a specific day of an event
+  const addDayMenuItem = useCallback((eventId, dayNumber, item) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const newItem = {
+            id: 'm-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5),
+            name: item.name,
+            category: item.category || 'Other',
+            unit: item.unit || 'Pax',
+            quantity: Number(item.quantity) || day.expectedGuests || 1000,
+            notes: item.notes || '',
+          }
+          const currentMenu = day.menu || []
+          return {
+            ...day,
+            menu: [...currentMenu, newItem],
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Update menu item on a specific day of an event
+  const updateDayMenuItem = useCallback((eventId, dayNumber, itemId, updatedFields) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentMenu = (day.menu || []).map((m) =>
+            m.id === itemId ? { ...m, ...updatedFields } : m
+          )
+          return { ...day, menu: currentMenu }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Delete menu item from a specific day of an event
+  const deleteDayMenuItem = useCallback((eventId, dayNumber, itemId) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentMenu = (day.menu || []).filter((m) => m.id !== itemId)
+          return { ...day, menu: currentMenu }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Copy Menu from one day to another day (e.g. Copy Day 1 -> Day 2, Copy Day 1 -> Day 3)
+  const copyDayMenu = useCallback((eventId, sourceDayNumber, targetDayNumber) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const sourceDay = (evt.days || []).find((d) => d.dayNumber === sourceDayNumber)
+        if (!sourceDay || !sourceDay.menu || sourceDay.menu.length === 0) return evt
+
+        const targetDay = (evt.days || []).find((d) => d.dayNumber === targetDayNumber)
+        const targetGuests = targetDay?.expectedGuests || sourceDay.expectedGuests || 1000
+
+        // Deep clone items with new IDs and adapt quantity to target day's expected guests
+        const clonedMenu = sourceDay.menu.map((item) => {
+          // If the item quantity in source was matching the source guests, match target guests
+          const shouldScale = item.quantity === sourceDay.expectedGuests || item.unit === 'Pax' || item.unit === 'Bottles'
+          return {
+            ...item,
+            id: 'm-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+            quantity: shouldScale ? targetGuests : item.quantity,
+          }
+        })
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== targetDayNumber) return day
+          return {
+            ...day,
+            menu: clonedMenu,
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
   const value = {
     events,
     createEvent,
     updateEvent,
     deleteEvent,
     getEventById,
+    addDayMenuItem,
+    updateDayMenuItem,
+    deleteDayMenuItem,
+    copyDayMenu,
   }
 
   return <EventContext.Provider value={value}>{children}</EventContext.Provider>
