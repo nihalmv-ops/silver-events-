@@ -27,6 +27,13 @@ export const VENDOR_STATUSES = [
   'Settled',
 ]
 
+export const VENDOR_PAYMENT_STATUSES = [
+  'Paid',
+  'Partial',
+  'Pending',
+  'Overdue',
+]
+
 const INITIAL_VENDORS = [
   {
     id: 'v-01',
@@ -36,11 +43,13 @@ const INITIAL_VENDORS = [
     email: 'orders@malabarbroilers.com',
     service: 'Halal cleaned fresh dressed chicken (4,500 kg daily cut for biryani)',
     eventId: 'evt-college-3day',
+    eventName: 'National Tech Fest 2026',
     dayNumber: 1,
     contractAmount: 680000,
     advance: 300000,
     paid: 300000,
-    status: 'Delivered',
+    dueDate: '2026-03-20',
+    status: 'Partial',
     notes: 'Morning 04:00 AM delivery verified at central kitchen with temp audit.',
   },
   {
@@ -51,11 +60,13 @@ const INITIAL_VENDORS = [
     email: 'supply@kaveriaqua.in',
     service: '250ml sealed mineral water bottles (10,000 bottles daily)',
     eventId: 'evt-college-3day',
+    eventName: 'National Tech Fest 2026',
     dayNumber: 1,
     contractAmount: 85000,
     advance: 40000,
     paid: 40000,
-    status: 'Delivered',
+    dueDate: '2026-03-21',
+    status: 'Partial',
     notes: 'Delivered in shrink-wrapped pallets at venue hydration point.',
   },
   {
@@ -66,11 +77,13 @@ const INITIAL_VENDORS = [
     email: 'sales@calicutspices.org',
     service: 'Premium aged Jeerakasala & XXL Basmati rice + whole garam masala',
     eventId: 'evt-college-3day',
+    eventName: 'National Tech Fest 2026',
     dayNumber: 1,
     contractAmount: 420000,
     advance: 250000,
     paid: 420000,
-    status: 'Settled',
+    dueDate: '2026-03-19',
+    status: 'Paid',
     notes: 'Aged grains inspected for aroma and zero breakage.',
   },
   {
@@ -81,11 +94,13 @@ const INITIAL_VENDORS = [
     email: 'dispatch@highwaylogistics.co.in',
     service: '4 insulated refrigerated trucks for food and water shuttling',
     eventId: 'evt-college-3day',
+    eventName: 'National Tech Fest 2026',
     dayNumber: 1,
     contractAmount: 65000,
     advance: 25000,
     paid: 45000,
-    status: 'In Progress',
+    dueDate: '2026-03-22',
+    status: 'Partial',
     notes: 'Convoy shuttling between kitchen and MES grounds.',
   },
   {
@@ -96,11 +111,13 @@ const INITIAL_VENDORS = [
     email: 'bulk@milmadairy.com',
     service: 'Pure cow ghee for biryani dum + fresh curd for raitha',
     eventId: 'evt-college-3day',
+    eventName: 'National Tech Fest 2026',
     dayNumber: 1,
     contractAmount: 95000,
     advance: 50000,
     paid: 50000,
-    status: 'Delivered',
+    dueDate: '2026-03-20',
+    status: 'Partial',
     notes: 'Direct morning supply from local chilling plant.',
   },
   {
@@ -111,12 +128,48 @@ const INITIAL_VENDORS = [
     email: 'flame@keralagas.com',
     service: '47.5 kg commercial cooking gas cylinders (12 cylinders)',
     eventId: 'evt-college-3day',
+    eventName: 'National Tech Fest 2026',
     dayNumber: 1,
     contractAmount: 48000,
     advance: 20000,
     paid: 48000,
-    status: 'Settled',
+    dueDate: '2026-03-18',
+    status: 'Paid',
     notes: 'Delivered to kitchen burning lines with safety valves inspected.',
+  },
+  {
+    id: 'v-07',
+    vendorName: 'EcoPack Kraft Food Containers',
+    category: 'Packaging & Thermal Boxes',
+    phone: '+91 98950 33412',
+    email: 'support@ecopackindia.com',
+    service: '10,000 heavy-gauge leakproof meal containers with lids daily',
+    eventId: 'evt-college-3day',
+    eventName: 'National Tech Fest 2026',
+    dayNumber: 1,
+    contractAmount: 110000,
+    advance: 50000,
+    paid: 50000,
+    dueDate: '2026-03-20',
+    status: 'Partial',
+    notes: 'Pre-printed batch containers for single-counter rapid serving.',
+  },
+  {
+    id: 'v-08',
+    vendorName: 'Apex Pro Sound & Stage Systems',
+    category: 'Sound & AV',
+    phone: '+91 97460 99812',
+    email: 'info@apexprosound.in',
+    service: 'Queue announcement PA speakers and distribution counter mic setup',
+    eventId: 'evt-college-3day',
+    eventName: 'National Tech Fest 2026',
+    dayNumber: 1,
+    contractAmount: 35000,
+    advance: 15000,
+    paid: 15000,
+    dueDate: '2026-03-23',
+    status: 'Pending',
+    notes: 'Crowd direction speakers stationed around the single queue corridor.',
   },
 ]
 
@@ -124,7 +177,18 @@ export function VendorProvider({ children }) {
   const [vendors, setVendors] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Ensure dueDate and balance exist
+          return parsed.map((v) => ({
+            ...v,
+            dueDate: v.dueDate || '2026-03-22',
+            eventName: v.eventName || 'National Tech Fest 2026',
+            status: v.paid >= v.contractAmount ? 'Paid' : (v.paid > 0 ? 'Partial' : (v.status || 'Pending')),
+          }))
+        }
+      }
     } catch {
       // Fallback
     }
@@ -143,6 +207,8 @@ export function VendorProvider({ children }) {
     const contractAmount = Number(vendor.contractAmount) || 0
     const advance = Number(vendor.advance) || 0
     const paid = Number(vendor.paid) !== undefined ? Number(vendor.paid) : advance
+    const calculatedStatus =
+      paid >= contractAmount ? 'Paid' : (paid > 0 ? 'Partial' : (vendor.status || 'Pending'))
 
     const newVendor = {
       id: 'v-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5),
@@ -151,7 +217,9 @@ export function VendorProvider({ children }) {
       advance,
       paid,
       dayNumber: Number(vendor.dayNumber) || 1,
-      status: vendor.status || 'Confirmed',
+      dueDate: vendor.dueDate || new Date().toISOString().split('T')[0],
+      eventName: vendor.eventName || 'National Tech Fest 2026',
+      status: calculatedStatus,
     }
 
     setVendors((prev) => [newVendor, ...prev])
@@ -170,6 +238,8 @@ export function VendorProvider({ children }) {
           updatedFields.advance !== undefined ? Number(updatedFields.advance) : vendor.advance
         const paid =
           updatedFields.paid !== undefined ? Number(updatedFields.paid) : vendor.paid
+        const calculatedStatus =
+          paid >= contractAmount ? 'Paid' : (paid > 0 ? 'Partial' : (updatedFields.status || vendor.status || 'Pending'))
 
         return {
           ...vendor,
@@ -177,6 +247,7 @@ export function VendorProvider({ children }) {
           contractAmount,
           advance,
           paid,
+          status: calculatedStatus,
         }
       })
     )
@@ -186,17 +257,22 @@ export function VendorProvider({ children }) {
     setVendors((prev) => prev.filter((vendor) => vendor.id !== id))
   }, [])
 
-  const recordPayment = useCallback((id, paymentAmount) => {
+  const recordPayment = useCallback((id, paymentDetails) => {
+    const amount = typeof paymentDetails === 'object' ? Number(paymentDetails.amount) || 0 : Number(paymentDetails) || 0
     setVendors((prev) =>
       prev.map((vendor) => {
         if (vendor.id !== id) return vendor
         const currentPaid = Number(vendor.paid) || 0
-        const newPaid = currentPaid + Number(paymentAmount)
-        const isSettled = newPaid >= (Number(vendor.contractAmount) || 0)
+        const newPaid = currentPaid + amount
+        const totalAmount = Number(vendor.contractAmount) || 0
+        const newStatus = newPaid >= totalAmount ? 'Paid' : (newPaid > 0 ? 'Partial' : 'Pending')
+
         return {
           ...vendor,
           paid: newPaid,
-          status: isSettled ? 'Settled' : vendor.status,
+          status: newStatus,
+          lastPaymentDate: typeof paymentDetails === 'object' && paymentDetails.date ? paymentDetails.date : new Date().toISOString().split('T')[0],
+          lastPaymentMethod: typeof paymentDetails === 'object' && paymentDetails.paymentMethod ? paymentDetails.paymentMethod : 'Bank Transfer',
         }
       })
     )
@@ -206,6 +282,7 @@ export function VendorProvider({ children }) {
     vendors,
     categories: VENDOR_CATEGORIES,
     statuses: VENDOR_STATUSES,
+    paymentStatuses: VENDOR_PAYMENT_STATUSES,
     addVendor,
     updateVendor,
     deleteVendor,
@@ -222,4 +299,3 @@ export function useVendors() {
   }
   return context
 }
-

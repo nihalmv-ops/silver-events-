@@ -24,6 +24,7 @@ export function VendorModal({
   const [contractAmount, setContractAmount] = useState(50000)
   const [advance, setAdvance] = useState(20000)
   const [paid, setPaid] = useState(20000)
+  const [dueDate, setDueDate] = useState(new Date().toISOString().split('T')[0])
   const [status, setStatus] = useState('Confirmed')
   const [notes, setNotes] = useState('')
 
@@ -39,6 +40,7 @@ export function VendorModal({
       setContractAmount(vendorToEdit.contractAmount || 0)
       setAdvance(vendorToEdit.advance || 0)
       setPaid(vendorToEdit.paid !== undefined ? vendorToEdit.paid : 0)
+      setDueDate(vendorToEdit.dueDate || new Date().toISOString().split('T')[0])
       setStatus(vendorToEdit.status || 'Confirmed')
       setNotes(vendorToEdit.notes || '')
     } else {
@@ -52,6 +54,7 @@ export function VendorModal({
       setContractAmount(50000)
       setAdvance(20000)
       setPaid(20000)
+      setDueDate(new Date().toISOString().split('T')[0])
       setStatus('Confirmed')
       setNotes('')
     }
@@ -72,6 +75,7 @@ export function VendorModal({
       contractAmount: Number(contractAmount) || 0,
       advance: Number(advance) || 0,
       paid: Number(paid) || 0,
+      dueDate,
       status: balance === 0 ? 'Settled' : status,
       notes: notes.trim(),
     })
@@ -140,7 +144,7 @@ export function VendorModal({
           required
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[#0f172a] block">
               Linked Event
@@ -152,7 +156,7 @@ export function VendorModal({
             >
               {events.map((evt) => (
                 <option key={evt.id} value={evt.id}>
-                  {evt.name}
+                  {evt.eventName || evt.name}
                 </option>
               ))}
             </select>
@@ -172,6 +176,14 @@ export function VendorModal({
               <option value={3}>Day 3</option>
             </select>
           </div>
+
+          <Input
+            label="Payment Due Date"
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            required
+          />
         </div>
 
         {/* FINANCIALS (INTERNAL COST LOGISTICS ONLY) */}
@@ -253,4 +265,3 @@ export function VendorModal({
     </Modal>
   )
 }
-
