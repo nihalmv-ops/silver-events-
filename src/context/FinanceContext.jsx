@@ -68,6 +68,16 @@ const INITIAL_PRODUCTS = [
     status: 'Active',
     notes: 'Fresh chilled mint lime cooler for guest reception',
   },
+  {
+    id: 'prod-06',
+    productName: 'Popcorn',
+    category: 'Snacks',
+    sellingPrice: 40,
+    costPrice: 15,
+    unit: 'Cone / Tub (100g)',
+    status: 'Active',
+    notes: 'Freshly popped warm butter-salted crispy popcorn for event counters and live snack stations',
+  },
 ]
 
 // Authentic 3-Day 30,000 People College Event Sales Dataset
@@ -181,7 +191,17 @@ export function FinanceProvider({ children }) {
       const saved = localStorage.getItem(STORAGE_PRODUCTS_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasPopcorn = parsed.some((p) => p.productName?.toLowerCase().includes('popcorn'))
+          if (!hasPopcorn) {
+            const popcornItem = INITIAL_PRODUCTS.find((p) => p.productName === 'Popcorn')
+            if (popcornItem) {
+              parsed.push(popcornItem)
+              localStorage.setItem(STORAGE_PRODUCTS_KEY, JSON.stringify(parsed))
+            }
+          }
+          return parsed
+        }
       }
     } catch {
       // Fallback
@@ -284,13 +304,21 @@ export function FinanceProvider({ children }) {
    * @param {'current_day' | 'future_days' | 'all_days'} scope
    * @param {number} currentDayNumber
    */
-  const updateProductPrice = useCallback((productId, newPrice, scope, currentDayNumber = 1) => {
-    const numPrice = Number(newPrice) || 0
+  const updateProductPrice = useCallback(
+    (productId, newPrice, scope, currentDayNumber = 1, newCostPrice = undefined) => {
+      const numPrice = Number(newPrice) || 0
 
-    // 1. Update product base selling price
-    setProducts((prev) =>
-      prev.map((p) => (p.id === productId ? { ...p, sellingPrice: numPrice } : p))
-    )
+      // 1. Update product base selling price & optional cost price
+      setProducts((prev) =>
+        prev.map((p) => {
+          if (p.id !== productId) return p
+          return {
+            ...p,
+            sellingPrice: numPrice,
+            ...(newCostPrice !== undefined ? { costPrice: Number(newCostPrice) || 0 } : {}),
+          }
+        })
+      )
 
     // 2. Adjust sales records based on chosen scope without altering locked/closed days!
     setSales((prev) =>

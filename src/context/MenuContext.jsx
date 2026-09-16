@@ -126,7 +126,17 @@ const INITIAL_CATALOG = [
     category: 'Tea/Coffee',
     unit: 'Cups',
     quantity: 1,
+    price: 20,
     notes: 'Freshly brewed frothy meter-tea and South Indian chicory filter coffee.',
+  },
+  {
+    id: 'dish-popcorn',
+    name: 'Popcorn',
+    category: 'Snacks',
+    unit: 'Cups',
+    quantity: 1,
+    price: 40,
+    notes: 'Crispy warm butter-salted popcorn snacks for event distribution and live counters.',
   },
 ]
 
@@ -134,7 +144,20 @@ export function MenuProvider({ children }) {
   const [menuItems, setMenuItems] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasPopcorn = parsed.some((d) => d.name?.toLowerCase().includes('popcorn'))
+          if (!hasPopcorn) {
+            const popcornDish = INITIAL_CATALOG.find((d) => d.id === 'dish-popcorn')
+            if (popcornDish) {
+              parsed.push(popcornDish)
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed))
+            }
+          }
+          return parsed
+        }
+      }
     } catch {
       // Fallback
     }

@@ -13,6 +13,7 @@ export function MenuItemModal({ isOpen, onClose, onSave, itemToEdit = null }) {
   const [category, setCategory] = useState('Lunch')
   const [unit, setUnit] = useState('Pax')
   const [quantity, setQuantity] = useState(1)
+  const [price, setPrice] = useState(40)
   const [notes, setNotes] = useState('')
 
   useEffect(() => {
@@ -21,12 +22,14 @@ export function MenuItemModal({ isOpen, onClose, onSave, itemToEdit = null }) {
       setCategory(itemToEdit.category || 'Lunch')
       setUnit(itemToEdit.unit || 'Pax')
       setQuantity(itemToEdit.quantity || 1)
+      setPrice(itemToEdit.price !== undefined ? itemToEdit.price : 40)
       setNotes(itemToEdit.notes || '')
     } else {
       setName('')
       setCategory('Lunch')
       setUnit('Pax')
       setQuantity(1)
+      setPrice(40)
       setNotes('')
     }
   }, [itemToEdit, isOpen])
@@ -44,6 +47,7 @@ export function MenuItemModal({ isOpen, onClose, onSave, itemToEdit = null }) {
       category,
       unit,
       quantity: Number(quantity) || 1,
+      price: Number(price) || 0,
       notes: notes.trim(),
     }
 
@@ -99,15 +103,27 @@ export function MenuItemModal({ isOpen, onClose, onSave, itemToEdit = null }) {
           />
         </div>
 
-        <Input
-          label="Default / Per-Head Quantity"
-          type="number"
-          min="0.1"
-          step="any"
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-          helperText="Standard serving baseline (e.g. 1 per pax or standard batch size)"
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label="Default / Per-Head Quantity"
+            type="number"
+            min="0.1"
+            step="any"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            helperText="Standard serving baseline"
+          />
+
+          <Input
+            label="Dish / Portion Price (₹)"
+            type="number"
+            min="0"
+            step="1"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            helperText="Selling price per portion"
+          />
+        </div>
 
         <div className="space-y-1.5">
           <label className="block text-xs font-semibold text-[#334155] tracking-wide">

@@ -30,6 +30,7 @@ import { useEvents } from '../context/EventContext'
 import { formatCurrency, formatNumber } from '../utils/formatters'
 import { SaleModal } from '../components/finance/SaleModal'
 import { ProductPriceModal } from '../components/finance/ProductPriceModal'
+import { AddProductModal } from '../components/finance/AddProductModal'
 import { DayClosingModal } from '../components/finance/DayClosingModal'
 
 export function SalesIncome() {
@@ -41,6 +42,7 @@ export function SalesIncome() {
     closings,
     deleteSale,
     deleteProduct,
+    updateProductPrice,
     getDailyFinancials,
     getThreeDayFinancials,
   } = useFinance()
@@ -55,6 +57,8 @@ export function SalesIncome() {
 
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false)
 
   const [isClosingModalOpen, setIsClosingModalOpen] = useState(false)
   const [closingDayNumber, setClosingDayNumber] = useState(1)
@@ -358,9 +362,19 @@ export function SalesIncome() {
               Standardized dish selling and cost price control with scope-based change protection
             </p>
           </div>
-          <Badge variant="gold" size="sm" className="w-fit">
-            Historical Days Protected
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="gold" size="sm" className="w-fit">
+              Historical Days Protected
+            </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<Plus className="w-3.5 h-3.5" />}
+              onClick={() => setIsAddProductModalOpen(true)}
+            >
+              + Add Dish
+            </Button>
+          </div>
         </CardHeader>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -641,6 +655,14 @@ export function SalesIncome() {
         onClose={() => setIsPriceModalOpen(false)}
         product={editingProduct}
         currentDayNumber={selectedDay === 'all' ? 1 : selectedDay}
+        onSavePrice={(productId, price, scope, day, costPrice) =>
+          updateProductPrice(productId, price, scope, day, costPrice)
+        }
+      />
+
+      <AddProductModal
+        isOpen={isAddProductModalOpen}
+        onClose={() => setIsAddProductModalOpen(false)}
       />
 
       <DayClosingModal

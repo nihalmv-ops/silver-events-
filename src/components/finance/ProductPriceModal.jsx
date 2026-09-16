@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
-import { IndianRupee, Tag, ShieldCheck, HelpCircle } from 'lucide-react'
+import { IndianRupee, Tag, ShieldCheck, TrendingUp } from 'lucide-react'
+import { useFinance } from '../../hooks/useFinance'
+import { useToast } from '../ui/ToastContext'
 
 export function ProductPriceModal({
   isOpen,
@@ -10,12 +12,17 @@ export function ProductPriceModal({
   currentDayNumber = 1,
   onSavePrice,
 }) {
+  const toast = useToast()
+  const { updateProductPrice } = useFinance()
+
   const [newPrice, setNewPrice] = useState('')
+  const [newCostPrice, setNewCostPrice] = useState('')
   const [scope, setScope] = useState('current_day') // 'current_day' | 'future_days' | 'all_days'
 
   useEffect(() => {
     if (product) {
       setNewPrice(product.sellingPrice || '')
+      setNewCostPrice(product.costPrice || '')
       setScope('current_day')
     }
   }, [product, isOpen])
@@ -23,22 +30,40 @@ export function ProductPriceModal({
   if (!product) return null
 
   const oldPrice = Number(product.sellingPrice) || 0
+  const oldCostPrice = Number(product.costPrice) || 0
 
   const handleSubmit = (e) => {
     e.preventDefault()
     const parsedPrice = Number(newPrice)
-    if (parsedPrice <= 0) return
+    const parsedCost = Number(newCostPrice) || 0
+    if (parsedPrice <= 0) {
+      toast.warning('Invalid Price', 'Please enter a valid selling price greater than ₹0.')
+      return
+    }
 
-    onSavePrice(product.id, parsedPrice, scope, currentDayNumber)
+    if (onSavePrice) {
+      onSavePrice(product.id, parsedPrice, scope, currentDayNumber)
+    } else {
+      updateProductPrice(product.id, parsedPrice, scope, currentDayNumber, parsedCost)
+    }
+
+    toast.success(
+      'Price Updated Successfully',
+      `"${product.productName}" updated: Selling Price ₹${parsedPrice.toLocaleString('en-IN')}, Cost Price ₹${parsedCost.toLocaleString('en-IN')}.`
+    )
     onClose()
   }
+
+  const calculatedMargin = (Number(newPrice) || 0) - (Number(newCostPrice) || 0)
+  const calculatedMarginPercent =
+    Number(newPrice) > 0 ? ((calculatedMargin / Number(newPrice)) * 100).toFixed(0) : 0
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Edit Price — ${product.productName}`}
-      description="Update selling price for event-level sales tracking with scope control."
+      title={`Edit Dish Price — ${product.productName}`}
+      description="Update selling price and cost price for event-level sales tracking with scope control."
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4 pt-2">
@@ -49,31 +74,65 @@ export function ProductPriceModal({
             <span className="text-[#64748b]">{product.category} • {product.unit}</span>
           </div>
           <div className="text-right">
-            <span className="text-[10px] uppercase font-bold text-[#64748b] block">Current Old Price</span>
-            <span className="text-base font-black text-[#0f172a]">
+            <span className="text-[10px] uppercase font-bold text-[#64748b] block">Current Selling Price</span>
+            <span className="text-base font-black text-[#163324]">
               ₹{oldPrice.toLocaleString('en-IN')}
             </span>
           </div>
         </div>
 
-        {/* New Price Input */}
-        <div>
-          <label className="block text-xs font-semibold text-[#334155] mb-1">
-            New Selling Price (₹) <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <IndianRupee className="w-4 h-4 absolute left-3 top-2.5 text-[#94a3b8]" />
-            <input
-              type="number"
-              min="1"
-              step="1"
-              value={newPrice}
-              onChange={(e) => setNewPrice(e.target.value)}
-              placeholder="e.g. 160"
-              className="w-full pl-9 pr-3 py-2 text-sm font-black border border-[#cbd5e1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#163324]"
-              required
-            />
+        {/* New Selling Price & Cost Price Inputs */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-semibold text-[#334155] mb-1">
+              New Selling Price (₹) <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <IndianRupee className="w-4 h-4 absolute left-3 top-2.5 text-[#94a3b8]" />
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                placeholder="e.g. 40"
+                className="w-full pl-9 pr-3 py-2 text-sm font-black text-[#163324] border border-[#cbd5e1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#163324]"
+                required
+                autoFocus
+              />
+            </div>
+            <span className="text-[10px] text-[#64748b] mt-0.5 block">Old: ₹{oldPrice}</span>
           </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#334155] mb-1">
+              Cost Price (₹)
+            </label>
+            <div className="relative">
+              <IndianRupee className="w-4 h-4 absolute left-3 top-2.5 text-[#94a3b8]" />
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={newCostPrice}
+                onChange={(e) => setNewCostPrice(e.target.value)}
+                placeholder="e.g. 15"
+                className="w-full pl-9 pr-3 py-2 text-sm font-semibold text-[#475569] border border-[#cbd5e1] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#163324]"
+              />
+            </div>
+            <span className="text-[10px] text-[#64748b] mt-0.5 block">Old: ₹{oldCostPrice}</span>
+          </div>
+        </div>
+
+        {/* Live Margin Preview */}
+        <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 flex items-center justify-between text-xs text-emerald-800">
+          <div className="flex items-center gap-1.5 font-medium">
+            <TrendingUp className="w-4 h-4 text-emerald-600" />
+            <span>Estimated Unit Margin:</span>
+          </div>
+          <span className="font-mono font-bold">
+            ₹{calculatedMargin} / unit ({calculatedMarginPercent}%)
+          </span>
         </div>
 
         {/* Apply This Price To Selection */}
@@ -169,4 +228,3 @@ export function ProductPriceModal({
     </Modal>
   )
 }
-

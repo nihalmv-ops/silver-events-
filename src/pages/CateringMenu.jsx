@@ -529,9 +529,16 @@ export function CateringMenu() {
                     </div>
 
                     <div className="text-xs text-[#64748b] space-y-1">
-                      <p>
-                        Serving Unit: <strong className="text-[#0f172a]">{dish.unit}</strong>
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p>
+                          Serving Unit: <strong className="text-[#0f172a]">{dish.unit}</strong>
+                        </p>
+                        {dish.price !== undefined && (
+                          <span className="font-mono font-bold text-[#163324] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-xs">
+                            ₹{dish.price}
+                          </span>
+                        )}
+                      </div>
                       {dish.notes && (
                         <p className="text-[11px] leading-relaxed line-clamp-2">
                           {dish.notes}
