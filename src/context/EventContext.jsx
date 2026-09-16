@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 const EventContext = createContext(null)
 
-const STORAGE_KEY = 'silver_catering_events_data_v5'
+const STORAGE_KEY = 'silver_catering_events_data_v6'
 
 export const BATCH_STATUSES = [
   'Pending',
@@ -17,7 +17,10 @@ export const BATCH_STATUSES = [
 
 export const QUALITY_CHECK_STATUSES = ['Pending', 'Pass', 'Failed']
 
+export const COUNTER_STATUSES = ['OPEN', 'PAUSED', 'CLOSED']
+
 // Realistic initial seed data featuring the 3-Day College Event (30,000 pax)
+// Strictly ONE DISTRIBUTION COUNTER for the event day
 const INITIAL_EVENTS = [
   {
     id: 'evt-college-3day',
@@ -46,13 +49,46 @@ const INITIAL_EVENTS = [
         foodPrepared: 10000,
         foodPacked: 9800,
         foodDelivered: 7450,
-        foodRemaining: 2350,
+        foodRemaining: 2550,
         waterRequired: '10,000 Bottles',
         waterTotalNumber: 10000,
         waterDelivered: 7800,
         waterRemaining: 2200,
         counterStatus: 'OPEN',
         expenses: 124000,
+        // ONE DISTRIBUTION COUNTER
+        counter: {
+          name: 'Main Event Distribution Counter',
+          status: 'OPEN',
+          currentStock: 2350,
+          currentBatch: 'Batch 02',
+          nextBatch: 'Batch 03 (3,000 Pax)',
+          nextBatchReady: false,
+          callRunnerPending: false,
+          pauseReason: '',
+        },
+        distribution: {
+          expected: 10000,
+          packed: 9800,
+          delivered: 7450,
+          remaining: 2550,
+          issues: [
+            {
+              id: 'iss-1',
+              type: 'Queue Surge',
+              urgency: 'Medium',
+              time: '12:45 PM',
+              notes: 'Students rush from auditorium. Extra line marshals positioned.',
+            },
+          ],
+        },
+        waterData: {
+          required: 10000,
+          available: 10000,
+          delivered: 7800,
+          remaining: 2200,
+          damaged: 45,
+        },
         foodPrep: {
           requiredMeals: 10000,
           preparedMeals: 10000,
@@ -126,9 +162,9 @@ const INITIAL_EVENTS = [
           { item: 'Emergency Market Veg & Mint Leaves', amount: 12000 },
         ],
         tasks: [
-          { id: 'd1-t1', title: 'Open 16 dining buffet counters at 12:30 PM', done: true },
+          { id: 'd1-t1', title: 'Open Main Event Distribution Counter at 12:30 PM', done: true },
           { id: 'd1-t2', title: 'Check food temperature at thermal staging depot (>68°C)', done: true },
-          { id: 'd1-t3', title: 'Replenish 800 water bottles at Main Entrance Wing', done: true },
+          { id: 'd1-t3', title: 'Replenish 800 water bottles at counter hydration station', done: true },
           { id: 'd1-t4', title: 'Staging Round 2 buffer biryani hot boxes for late batches', done: false },
           { id: 'd1-t5', title: 'Banana leaf disposal and recycling bags dispatch', done: false },
         ],
@@ -137,7 +173,7 @@ const INITIAL_EVENTS = [
           { id: 'd1-p2', text: 'Extra 50 chafing dish fuel cans for evening round', urgency: 'medium' },
           { id: 'd1-p3', text: 'Steward briefing for 3:00 PM VIP faculty seating', urgency: 'normal' },
         ],
-        notes: 'Main gate opened at 11:30 AM. Peak crowd estimated between 1:00 PM and 2:30 PM. 16 main lines running smoothly.',
+        notes: 'Main gate opened at 11:30 AM. Peak crowd estimated between 1:00 PM and 2:30 PM. Single Main Counter serving continuously.',
       },
       {
         dayNumber: 2,
@@ -154,8 +190,32 @@ const INITIAL_EVENTS = [
         waterTotalNumber: 10000,
         waterDelivered: 1500,
         waterRemaining: 8500,
-        counterStatus: 'SCHEDULED',
+        counterStatus: 'PAUSED',
         expenses: 138000,
+        counter: {
+          name: 'Main Event Distribution Counter',
+          status: 'PAUSED',
+          currentStock: 2400,
+          currentBatch: 'Batch 01',
+          nextBatch: 'Batch 02 (3,500 Pax)',
+          nextBatchReady: true,
+          callRunnerPending: false,
+          pauseReason: 'Awaiting seminar inaugural session completion',
+        },
+        distribution: {
+          expected: 10000,
+          packed: 2400,
+          delivered: 0,
+          remaining: 10000,
+          issues: [],
+        },
+        waterData: {
+          required: 10000,
+          available: 10000,
+          delivered: 1500,
+          remaining: 8500,
+          damaged: 20,
+        },
         foodPrep: {
           requiredMeals: 10000,
           preparedMeals: 4000,
@@ -251,8 +311,32 @@ const INITIAL_EVENTS = [
         waterTotalNumber: 10000,
         waterDelivered: 0,
         waterRemaining: 10000,
-        counterStatus: 'PLANNED',
+        counterStatus: 'CLOSED',
         expenses: 115000,
+        counter: {
+          name: 'Main Event Distribution Counter',
+          status: 'CLOSED',
+          currentStock: 0,
+          currentBatch: 'Batch 01',
+          nextBatch: 'Batch 02 (3,500 Pax)',
+          nextBatchReady: false,
+          callRunnerPending: false,
+          pauseReason: '',
+        },
+        distribution: {
+          expected: 10000,
+          packed: 0,
+          delivered: 0,
+          remaining: 10000,
+          issues: [],
+        },
+        waterData: {
+          required: 10000,
+          available: 10000,
+          delivered: 0,
+          remaining: 10000,
+          damaged: 0,
+        },
         foodPrep: {
           requiredMeals: 10000,
           preparedMeals: 0,
@@ -366,6 +450,30 @@ const INITIAL_EVENTS = [
         waterRemaining: 0,
         counterStatus: 'CLOSED',
         expenses: 68500,
+        counter: {
+          name: 'Main Event Distribution Counter',
+          status: 'CLOSED',
+          currentStock: 0,
+          currentBatch: 'Batch 02',
+          nextBatch: 'None',
+          nextBatchReady: false,
+          callRunnerPending: false,
+          pauseReason: '',
+        },
+        distribution: {
+          expected: 1450,
+          packed: 1450,
+          delivered: 1450,
+          remaining: 0,
+          issues: [],
+        },
+        waterData: {
+          required: 3000,
+          available: 3000,
+          delivered: 3000,
+          remaining: 0,
+          damaged: 12,
+        },
         foodPrep: {
           requiredMeals: 1450,
           preparedMeals: 1450,
@@ -460,7 +568,7 @@ export function EventProvider({ children }) {
     const id = 'evt-' + Date.now().toString(36)
     const code = 'EVT-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000)
 
-    // Ensure daily guest planning has default foodPrep, foodPacking, and batches
+    // Ensure daily guest planning has default Phase 5 & 6 operational structures
     const populatedDays = (newEvent.days || []).map((d) => {
       const guests = Number(d.expectedGuests) || 1000
       const b1 = Math.ceil(guests * 0.35)
@@ -469,6 +577,31 @@ export function EventProvider({ children }) {
 
       return {
         ...d,
+        counterStatus: 'OPEN',
+        counter: d.counter || {
+          name: 'Main Event Distribution Counter',
+          status: 'OPEN',
+          currentStock: guests,
+          currentBatch: 'Batch 01',
+          nextBatch: 'Batch 02',
+          nextBatchReady: false,
+          callRunnerPending: false,
+          pauseReason: '',
+        },
+        distribution: d.distribution || {
+          expected: guests,
+          packed: guests,
+          delivered: 0,
+          remaining: guests,
+          issues: [],
+        },
+        waterData: d.waterData || {
+          required: guests,
+          available: guests,
+          delivered: 0,
+          remaining: guests,
+          damaged: 0,
+        },
         foodPrep: d.foodPrep || {
           requiredMeals: guests,
           preparedMeals: 0,
@@ -666,7 +799,6 @@ export function EventProvider({ children }) {
   // PHASE 5: FOOD PREPARATION & BATCH METHODS
   // ==========================================
 
-  // Update Food Preparation metrics for an event day
   const updateFoodPrep = useCallback((eventId, dayNumber, prepData) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -699,7 +831,6 @@ export function EventProvider({ children }) {
     )
   }, [])
 
-  // Add a Batch to an event day
   const addBatch = useCallback((eventId, dayNumber, batchData) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -734,7 +865,6 @@ export function EventProvider({ children }) {
     )
   }, [])
 
-  // Update an existing Batch
   const updateBatch = useCallback((eventId, dayNumber, batchId, updatedFields) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -763,7 +893,6 @@ export function EventProvider({ children }) {
     )
   }, [])
 
-  // Delete a Batch
   const deleteBatch = useCallback((eventId, dayNumber, batchId) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -783,11 +912,6 @@ export function EventProvider({ children }) {
     )
   }, [])
 
-  // ==========================================
-  // PHASE 5: FOOD PACKING METHODS
-  // ==========================================
-
-  // Update complete packing metrics
   const updateFoodPacking = useCallback((eventId, dayNumber, packingData) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -819,7 +943,6 @@ export function EventProvider({ children }) {
     )
   }, [])
 
-  // Fast Mobile Operation: Increment or decrement Packed Containers (+Packed, -Correction)
   const adjustPackedContainers = useCallback((eventId, dayNumber, delta) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -850,7 +973,6 @@ export function EventProvider({ children }) {
     )
   }, [])
 
-  // Fast Mobile Operation: Adjust Damaged Containers
   const adjustDamagedContainers = useCallback((eventId, dayNumber, delta) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -881,6 +1003,307 @@ export function EventProvider({ children }) {
     )
   }, [])
 
+  // ==========================================
+  // PHASE 6: ONE COUNTER, DISTRIBUTION & WATER
+  // ==========================================
+
+  // Set counter status: OPEN, PAUSED, CLOSED
+  const setCounterStatus = useCallback((eventId, dayNumber, status, reason = '') => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentCounter = day.counter || {
+            name: 'Main Event Distribution Counter',
+            status: 'OPEN',
+            currentStock: 2000,
+            currentBatch: 'Batch 01',
+            nextBatch: 'Batch 02',
+            nextBatchReady: false,
+            callRunnerPending: false,
+            pauseReason: '',
+          }
+
+          return {
+            ...day,
+            counterStatus: status,
+            counter: {
+              ...currentCounter,
+              status,
+              pauseReason: status === 'PAUSED' ? reason : '',
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Mark next batch ready
+  const triggerNextBatchReady = useCallback((eventId, dayNumber) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentCounter = day.counter || {}
+          return {
+            ...day,
+            counter: {
+              ...currentCounter,
+              nextBatchReady: true,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Bring next batch to counter
+  const triggerBringNextBatch = useCallback((eventId, dayNumber) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentCounter = day.counter || {}
+          // Rotate batches and increment stock
+          const currentBatchName = currentCounter.nextBatch?.split(' ')[0] || 'Batch 03'
+          const addedStock = 3000
+
+          return {
+            ...day,
+            counter: {
+              ...currentCounter,
+              currentBatch: currentBatchName,
+              nextBatch: 'Buffer Cauldrons Reserve',
+              currentStock: (currentCounter.currentStock || 0) + addedStock,
+              nextBatchReady: false,
+              callRunnerPending: false,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Adjust distribution delivered (+Add Delivered, -Correction)
+  const adjustDistributionDelivered = useCallback((eventId, dayNumber, delta) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentDist = day.distribution || {
+            expected: day.expectedGuests || 10000,
+            packed: day.foodPacked || 9800,
+            delivered: day.foodDelivered || 7450,
+            remaining: 2550,
+            issues: [],
+          }
+          const currentCounter = day.counter || {}
+
+          const newDelivered = Math.max(0, (currentDist.delivered || 0) + delta)
+          const newStock = Math.max(0, (currentCounter.currentStock || 0) - delta)
+
+          return {
+            ...day,
+            foodDelivered: newDelivered,
+            distribution: {
+              ...currentDist,
+              delivered: newDelivered,
+              remaining: Math.max(0, (currentDist.expected || 10000) - newDelivered),
+            },
+            counter: {
+              ...currentCounter,
+              currentStock: newStock,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Adjust distribution packed (+Add Packed)
+  const adjustDistributionPacked = useCallback((eventId, dayNumber, delta) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentDist = day.distribution || {
+            expected: day.expectedGuests || 10000,
+            packed: day.foodPacked || 9800,
+            delivered: day.foodDelivered || 7450,
+            remaining: 2550,
+            issues: [],
+          }
+          const currentCounter = day.counter || {}
+
+          const newPacked = Math.max(0, (currentDist.packed || 0) + delta)
+          const newStock = Math.max(0, (currentCounter.currentStock || 0) + delta)
+
+          return {
+            ...day,
+            foodPacked: newPacked,
+            distribution: {
+              ...currentDist,
+              packed: newPacked,
+            },
+            counter: {
+              ...currentCounter,
+              currentStock: newStock,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Report distribution issue
+  const reportDistributionIssue = useCallback((eventId, dayNumber, issue) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentDist = day.distribution || { issues: [] }
+          const newIssue = {
+            id: 'iss-' + Date.now().toString(36),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            ...issue,
+          }
+
+          return {
+            ...day,
+            distribution: {
+              ...currentDist,
+              issues: [newIssue, ...(currentDist.issues || [])],
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Adjust water delivered (+50, +100, etc.)
+  const adjustWaterDelivered = useCallback((eventId, dayNumber, delta) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentWater = day.waterData || {
+            required: day.waterTotalNumber || 10000,
+            available: day.waterTotalNumber || 10000,
+            delivered: day.waterDelivered || 7800,
+            remaining: 2200,
+            damaged: 45,
+          }
+
+          const newDelivered = Math.max(0, (currentWater.delivered || 0) + delta)
+
+          return {
+            ...day,
+            waterDelivered: newDelivered,
+            waterRemaining: Math.max(0, (currentWater.available || 10000) - newDelivered),
+            waterData: {
+              ...currentWater,
+              delivered: newDelivered,
+              remaining: Math.max(0, (currentWater.available || 10000) - newDelivered),
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Adjust water available / replenished
+  const adjustWaterAvailable = useCallback((eventId, dayNumber, delta) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentWater = day.waterData || {
+            required: 10000,
+            available: 10000,
+            delivered: 7800,
+            remaining: 2200,
+            damaged: 45,
+          }
+
+          const newAvailable = Math.max(0, (currentWater.available || 0) + delta)
+
+          return {
+            ...day,
+            waterData: {
+              ...currentWater,
+              available: newAvailable,
+              remaining: Math.max(0, newAvailable - (currentWater.delivered || 0)),
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Adjust water damaged
+  const adjustWaterDamaged = useCallback((eventId, dayNumber, delta) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentWater = day.waterData || {
+            required: 10000,
+            available: 10000,
+            delivered: 7800,
+            remaining: 2200,
+            damaged: 45,
+          }
+
+          const newDamaged = Math.max(0, (currentWater.damaged || 0) + delta)
+
+          return {
+            ...day,
+            waterData: {
+              ...currentWater,
+              damaged: newDamaged,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
   const value = {
     events,
     createEvent,
@@ -891,7 +1314,7 @@ export function EventProvider({ children }) {
     updateDayMenuItem,
     deleteDayMenuItem,
     copyDayMenu,
-    // Phase 5 exports
+    // Phase 5
     updateFoodPrep,
     addBatch,
     updateBatch,
@@ -899,6 +1322,16 @@ export function EventProvider({ children }) {
     updateFoodPacking,
     adjustPackedContainers,
     adjustDamagedContainers,
+    // Phase 6
+    setCounterStatus,
+    triggerNextBatchReady,
+    triggerBringNextBatch,
+    adjustDistributionDelivered,
+    adjustDistributionPacked,
+    reportDistributionIssue,
+    adjustWaterDelivered,
+    adjustWaterAvailable,
+    adjustWaterDamaged,
   }
 
   return <EventContext.Provider value={value}>{children}</EventContext.Provider>
