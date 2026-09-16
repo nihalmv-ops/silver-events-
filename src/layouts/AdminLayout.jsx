@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Select } from '../components/ui/Select'
 import { useDisclosure } from '../hooks/useDisclosure'
+import { ErrorBoundary } from '../components/common/ErrorBoundary'
 
 function AdminLayoutInner() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
@@ -64,7 +65,9 @@ function AdminLayoutInner() {
 
         {/* Scrollable Page Container (with bottom padding for mobile bar) */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
 

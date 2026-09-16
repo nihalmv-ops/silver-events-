@@ -62,6 +62,13 @@ export function Arrangements() {
 
   const eventDays = currentEvent?.days || []
 
+  const currentDay = useMemo(() => {
+    return (
+      eventDays.find((d) => d.dayNumber === selectedDayNumber) ||
+      eventDays[0] || { dayNumber: selectedDayNumber, dayLabel: `Day ${selectedDayNumber}` }
+    )
+  }, [eventDays, selectedDayNumber])
+
   // Filtered checklist items
   const filteredItems = useMemo(() => {
     return arrangements.filter((item) => {
@@ -168,7 +175,7 @@ export function Arrangements() {
             >
               {events.map((evt) => (
                 <option key={evt.id} value={evt.id}>
-                  {evt.name} ({formatNumber(evt.totalExpectedGuests)} Pax)
+                  {evt.eventName || evt.name} ({formatNumber(evt.totalExpectedGuests)} Pax)
                 </option>
               ))}
             </select>
