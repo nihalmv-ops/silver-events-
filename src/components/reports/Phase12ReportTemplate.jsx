@@ -19,9 +19,9 @@ export function Phase12ReportTemplate({
     day1: { title: 'Day 1 Operations & Financial Report', subtitle: 'Central Kitchen, Single Counter & Daily Sales Reconciliation' },
     day2: { title: 'Day 2 Operations & Financial Report', subtitle: 'Central Kitchen, Single Counter & Daily Sales Reconciliation' },
     day3: { title: 'Day 3 Operations & Financial Report', subtitle: 'Central Kitchen, Single Counter & Daily Sales Reconciliation' },
-    'complete-3day': { title: 'Complete 3-Day Event Operations & Financial Report', subtitle: '30,000 Pax Biryani & Hydration Audit, Full Revenue & P&L Statement' },
-    'financial-summary': { title: 'Executive Financial Summary & P&L Ledger', subtitle: 'Daily & 3-Day Gross Revenue, 19 Expense Categories, and Net Operating Yield' },
-    expenses: { title: 'Comprehensive Event Expense & Procurement Report', subtitle: '19 Operational Categories, Supplier Allocations & Disbursed Vouchers' },
+    'complete-3day': { title: 'Complete 3-Day Event Operations & Financial Report', subtitle: '30,000 Pax Biryani, Popcorn & Hydration Audit, Full Revenue & P&L Statement' },
+    'financial-summary': { title: 'Executive Financial Summary & P&L Ledger', subtitle: 'Daily & 3-Day Gross Revenue, Operational Expense Categories, and Net Operating Yield' },
+    expenses: { title: 'Comprehensive Event Expense & Procurement Report', subtitle: 'Operational Cost Centers, Supplier Allocations & Disbursed Vouchers' },
     'sales-income': { title: 'Event Sales & Meal Portion Revenue Report', subtitle: 'Dish-wise Distributed Volumes, Applied Unit Prices & Realized Income' },
   }
 
@@ -34,35 +34,30 @@ export function Phase12ReportTemplate({
   const targetDayFin =
     activeDayNum === 1 ? day1Fin : activeDayNum === 2 ? day2Fin : day3Fin
 
-  // Food summary metrics
-  const foodSummary = isSingleDay
-    ? {
-        required: 10000,
-        prepared: 10000,
-        packed: 10000,
-        delivered: activeDayNum === 1 ? 9850 : activeDayNum === 2 ? 9920 : 9800,
-        remaining: activeDayNum === 1 ? 150 : activeDayNum === 2 ? 80 : 200,
-      }
-    : {
-        required: 30000,
-        prepared: 30000,
-        packed: 30000,
-        delivered: 29570,
-        remaining: 430,
-      }
-
-  // Water summary metrics
-  const waterSummary = isSingleDay
-    ? {
-        total: 10000,
-        used: activeDayNum === 1 ? 9900 : activeDayNum === 2 ? 9950 : 9850,
-        remaining: activeDayNum === 1 ? 100 : activeDayNum === 2 ? 50 : 150,
-      }
-    : {
-        total: 30000,
-        used: 29700,
-        remaining: 300,
-      }
+  // Product stock rows based on active day or 3-day total
+  const productRows = isSingleDay
+    ? activeDayNum === 1
+      ? [
+          { name: 'Chicken Biryani', unit: 'Portion / Box', price: 150, prep: 5000, sold: 4700, rem: 300, income: 705000 },
+          { name: 'Popcorn', unit: 'Tub / Cone', price: 30, prep: 2000, sold: 1800, rem: 200, income: 54000 },
+          { name: 'Water Bottle', unit: '250ml Sealed Bottle', price: 15, prep: 5000, sold: 4500, rem: 500, income: 67500 },
+        ]
+      : activeDayNum === 2
+      ? [
+          { name: 'Chicken Biryani', unit: 'Portion / Box', price: 150, prep: 5200, sold: 5000, rem: 200, income: 750000 },
+          { name: 'Popcorn', unit: 'Tub / Cone', price: 30, prep: 2200, sold: 2000, rem: 200, income: 60000 },
+          { name: 'Water Bottle', unit: '250ml Sealed Bottle', price: 15, prep: 5200, sold: 4800, rem: 400, income: 72000 },
+        ]
+      : [
+          { name: 'Chicken Biryani', unit: 'Portion / Box', price: 150, prep: 5000, sold: 4800, rem: 200, income: 720000 },
+          { name: 'Popcorn', unit: 'Tub / Cone', price: 30, prep: 2000, sold: 1900, rem: 100, income: 57000 },
+          { name: 'Water Bottle', unit: '250ml Sealed Bottle', price: 15, prep: 5000, sold: 4700, rem: 300, income: 70500 },
+        ]
+    : [
+        { name: 'Chicken Biryani', unit: 'Portion / Box', price: 150, prep: 15200, sold: 14500, rem: 700, income: 2175000 },
+        { name: 'Popcorn', unit: 'Tub / Cone', price: 30, prep: 6200, sold: 5700, rem: 500, income: 171000 },
+        { name: 'Water Bottle', unit: '250ml Sealed Bottle', price: 15, prep: 15200, sold: 14000, rem: 1200, income: 210000 },
+      ]
 
   // Sales data to render
   const salesList = isSingleDay
@@ -100,11 +95,11 @@ export function Phase12ReportTemplate({
   // Manager notes
   const managerNotes = {
     eventManager:
-      'All operations proceeded smoothly adhering strictly to the internal single distribution counter blueprint. High guest throughput sustained at 190 meal packages per minute with zero bottleneck.',
+      'All operations proceeded smoothly adhering strictly to the internal single distribution counter blueprint. High guest throughput sustained with zero serving bottleneck.',
     kitchenNotes:
-      'Central kitchen completed 12 dum pots of Malabar Chicken Biryani on schedule. Core serving temperature audited at 74°C+. Zero bacterial or spoilage rejects recorded.',
+      'Central kitchen completed Malabar Chicken Biryani cauldrons and live popcorn station batches on schedule. Core serving temperatures audited at 74°C+. Zero bacterial or spoilage rejects recorded.',
     distributionNotes:
-      'One Distribution Counter operated continuously with dual fast-lane queues. Bottled water handed simultaneously with hot biryani box.',
+      'Strictly ONE Distribution Counter operated continuously. Bottled water and warm popcorn handed simultaneously with hot biryani box.',
   }
 
   return (
@@ -116,63 +111,74 @@ export function Phase12ReportTemplate({
         event={event}
       />
 
-      {/* 2. FOOD SUMMARY */}
+      {/* 2. CORE PRODUCTS SUMMARY TABLE */}
       <section className="mb-5">
         <div className="bg-[#163324] text-[#c29c5e] px-3 py-1.5 font-bold uppercase tracking-wider text-[11px] rounded-t flex items-center justify-between">
-          <span>Food Summary — Chicken Biryani (Halal Dum)</span>
-          <span className="text-[10px] text-white">Single Distribution Counter Protocol</span>
+          <span>Core Event Products — Stock & Distribution Register</span>
+          <span className="text-[10px] text-white">Strictly ONE Distribution Counter Protocol</span>
         </div>
         <table className="w-full border-collapse border border-[#cbd5e1] text-left">
           <thead className="bg-[#f8fafc] text-[#475569] font-bold uppercase text-[10px]">
             <tr>
-              <th className="border border-[#cbd5e1] p-2 text-center">Required Meals</th>
-              <th className="border border-[#cbd5e1] p-2 text-center">Prepared Meals</th>
-              <th className="border border-[#cbd5e1] p-2 text-center">Packed Containers</th>
-              <th className="border border-[#cbd5e1] p-2 text-center">Delivered to Guests</th>
-              <th className="border border-[#cbd5e1] p-2 text-center">Remaining Buffer Stock</th>
+              <th className="border border-[#cbd5e1] p-2">Product Name</th>
+              <th className="border border-[#cbd5e1] p-2">Unit</th>
+              <th className="border border-[#cbd5e1] p-2 text-right">Price</th>
+              <th className="border border-[#cbd5e1] p-2 text-center">Prepared / Available</th>
+              <th className="border border-[#cbd5e1] p-2 text-center">Sold / Distributed</th>
+              <th className="border border-[#cbd5e1] p-2 text-center">Remaining Buffer</th>
+              <th className="border border-[#cbd5e1] p-2 text-right">Product Income</th>
             </tr>
           </thead>
           <tbody>
-            <tr className="font-mono text-center font-bold">
-              <td className="border border-[#cbd5e1] p-2 text-[#0f172a]">{formatNumber(foodSummary.required)}</td>
-              <td className="border border-[#cbd5e1] p-2 text-blue-700">{formatNumber(foodSummary.prepared)}</td>
-              <td className="border border-[#cbd5e1] p-2 text-purple-700">{formatNumber(foodSummary.packed)}</td>
-              <td className="border border-[#cbd5e1] p-2 text-emerald-700">{formatNumber(foodSummary.delivered)}</td>
-              <td className="border border-[#cbd5e1] p-2 text-amber-700">{formatNumber(foodSummary.remaining)}</td>
-            </tr>
+            {productRows.map((p, idx) => (
+              <tr key={idx} className="font-mono text-center">
+                <td className="border border-[#cbd5e1] p-2 text-left font-sans font-bold text-[#0f172a]">
+                  {p.name}
+                </td>
+                <td className="border border-[#cbd5e1] p-2 text-left font-sans text-[#475569]">
+                  {p.unit}
+                </td>
+                <td className="border border-[#cbd5e1] p-2 text-right font-bold text-[#163324]">
+                  ₹{p.price}
+                </td>
+                <td className="border border-[#cbd5e1] p-2 text-blue-700 font-bold">
+                  {formatNumber(p.prep)}
+                </td>
+                <td className="border border-[#cbd5e1] p-2 text-emerald-800 font-black">
+                  {formatNumber(p.sold)}
+                </td>
+                <td className="border border-[#cbd5e1] p-2 text-amber-700 font-bold">
+                  {formatNumber(p.rem)}
+                </td>
+                <td className="border border-[#cbd5e1] p-2 text-right font-black text-[#163324]">
+                  ₹{p.income.toLocaleString('en-IN')}
+                </td>
+              </tr>
+            ))}
           </tbody>
-        </table>
-      </section>
-
-      {/* 3. WATER SUMMARY */}
-      <section className="mb-5">
-        <div className="bg-[#163324] text-[#c29c5e] px-3 py-1.5 font-bold uppercase tracking-wider text-[11px] rounded-t flex items-center justify-between">
-          <span>Water Summary — 250ml Sealed Mineral Bottles</span>
-          <span className="text-[10px] text-white">Palletized Stock Allocation</span>
-        </div>
-        <table className="w-full border-collapse border border-[#cbd5e1] text-left">
-          <thead className="bg-[#f8fafc] text-[#475569] font-bold uppercase text-[10px]">
+          <tfoot className="bg-[#f8fafc] font-bold">
             <tr>
-              <th className="border border-[#cbd5e1] p-2 text-center">Total Stock Received</th>
-              <th className="border border-[#cbd5e1] p-2 text-center">Distributed & Used</th>
-              <th className="border border-[#cbd5e1] p-2 text-center">Remaining Stock</th>
-              <th className="border border-[#cbd5e1] p-2 text-center">Hydration Fulfill %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="font-mono text-center font-bold">
-              <td className="border border-[#cbd5e1] p-2 text-[#0f172a]">{formatNumber(waterSummary.total)}</td>
-              <td className="border border-[#cbd5e1] p-2 text-blue-700">{formatNumber(waterSummary.used)}</td>
-              <td className="border border-[#cbd5e1] p-2 text-amber-700">{formatNumber(waterSummary.remaining)}</td>
-              <td className="border border-[#cbd5e1] p-2 text-emerald-700">
-                {((waterSummary.used / waterSummary.total) * 100).toFixed(1)}%
+              <td colSpan={3} className="border border-[#cbd5e1] p-2 text-right uppercase">
+                {isSingleDay ? `Day ${activeDayNum} Total:` : 'All 3 Days Grand Total:'}
+              </td>
+              <td className="border border-[#cbd5e1] p-2 text-center font-mono text-blue-900">
+                {formatNumber(productRows.reduce((s, i) => s + i.prep, 0))}
+              </td>
+              <td className="border border-[#cbd5e1] p-2 text-center font-mono text-emerald-950 font-black">
+                {formatNumber(productRows.reduce((s, i) => s + i.sold, 0))}
+              </td>
+              <td className="border border-[#cbd5e1] p-2 text-center font-mono text-amber-800">
+                {formatNumber(productRows.reduce((s, i) => s + i.rem, 0))}
+              </td>
+              <td className="border border-[#cbd5e1] p-2 text-right font-mono text-base text-[#163324]">
+                {formatCurrency(totalSalesAmount)}
               </td>
             </tr>
-          </tbody>
+          </tfoot>
         </table>
       </section>
 
-      {/* 4. SALES DETAILS */}
+      {/* 3. SALES DETAILS */}
       <section className="mb-5">
         <div className="bg-[#163324] text-[#c29c5e] px-3 py-1.5 font-bold uppercase tracking-wider text-[11px] rounded-t flex items-center justify-between">
           <span>Sales & Meal Portion Income Details</span>
@@ -222,10 +228,10 @@ export function Phase12ReportTemplate({
         </table>
       </section>
 
-      {/* 5. EXPENSE DETAILS */}
+      {/* 4. EXPENSE DETAILS */}
       <section className="mb-5">
         <div className="bg-[#163324] text-[#c29c5e] px-3 py-1.5 font-bold uppercase tracking-wider text-[11px] rounded-t flex items-center justify-between">
-          <span>Expense Details — 19 Operational Cost Centers</span>
+          <span>Expense Details — Operational Cost Centers</span>
           <span className="text-[10px] text-white">Internal Operations Accounting</span>
         </div>
         <table className="w-full border-collapse border border-[#cbd5e1] text-left">
@@ -275,7 +281,7 @@ export function Phase12ReportTemplate({
         </table>
       </section>
 
-      {/* 6. FINANCIAL SUMMARY (NET INCOME) */}
+      {/* 5. FINANCIAL SUMMARY (NET INCOME) */}
       <section className="mb-5">
         <div className="bg-[#163324] text-[#c29c5e] px-3 py-1.5 font-bold uppercase tracking-wider text-[11px] rounded-t flex items-center justify-between">
           <span>Executive Financial Summary & Net Income Statement</span>
@@ -303,7 +309,7 @@ export function Phase12ReportTemplate({
         </table>
       </section>
 
-      {/* 7. PENDING TASKS */}
+      {/* 6. PENDING TASKS */}
       <section className="mb-5">
         <div className="bg-[#163324] text-[#c29c5e] px-3 py-1.5 font-bold uppercase tracking-wider text-[11px] rounded-t flex items-center justify-between">
           <span>Operational Checklist & Task Audit</span>
@@ -344,7 +350,7 @@ export function Phase12ReportTemplate({
         </table>
       </section>
 
-      {/* 8. MANAGER NOTES */}
+      {/* 7. MANAGER NOTES */}
       <section className="mb-6">
         <div className="bg-[#163324] text-[#c29c5e] px-3 py-1.5 font-bold uppercase tracking-wider text-[11px] rounded-t">
           Manager & Supervisor Notes
@@ -365,10 +371,10 @@ export function Phase12ReportTemplate({
         </div>
       </section>
 
-      {/* 9. AUTHORIZED SIGNATURES & FOOTER */}
+      {/* 8. AUTHORIZED SIGNATURES & FOOTER */}
       <ReportFooter />
 
-      {/* 10. PAGE NUMBER & BRANDING */}
+      {/* 9. PAGE NUMBER & BRANDING */}
       <div className="mt-4 pt-2 border-t border-[#cbd5e1] flex items-center justify-between text-[10px] text-[#64748b] font-mono">
         <span>SILVER CATERING — Official Operations & Financial Document</span>
         <span className="font-bold">Page 1 of 1</span>
@@ -376,4 +382,4 @@ export function Phase12ReportTemplate({
     </div>
   )
 }
-
+export default Phase12ReportTemplate

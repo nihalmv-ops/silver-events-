@@ -7,6 +7,10 @@ import {
   Login,
   Events,
   EventDetail,
+  DayOperations,
+  OneCounter,
+  StockManagement,
+  ProductsPrices,
   CateringMenu,
   FoodPreparation,
   FoodPacking,
@@ -39,6 +43,17 @@ export function AppRoutes() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="events" element={<Events />} />
           <Route path="events/:id" element={<EventDetail />} />
+
+          {/* 3-Day Event Operations Dedicated Routes */}
+          <Route path="day-1" element={<DayOperations defaultDay={1} />} />
+          <Route path="day-2" element={<DayOperations defaultDay={2} />} />
+          <Route path="day-3" element={<DayOperations defaultDay={3} />} />
+          <Route path="day/:dayNumber" element={<DayOperations />} />
+          <Route path="one-counter" element={<OneCounter />} />
+          <Route path="stock" element={<StockManagement />} />
+          <Route path="products" element={<ProductsPrices />} />
+
+          {/* Core Operations & Financials */}
           <Route path="catering-menu" element={<CateringMenu />} />
           <Route path="food-prep" element={<FoodPreparation />} />
           <Route path="food-packing" element={<FoodPacking />} />
@@ -56,6 +71,7 @@ export function AppRoutes() {
           <Route path="print-reports" element={<PrintReports />} />
           <Route path="printouts" element={<Printouts />} />
           <Route path="settings" element={<Settings />} />
+
           {/* Wildcard redirect back to Dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
