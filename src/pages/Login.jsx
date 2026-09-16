@@ -220,8 +220,8 @@ export function Login() {
           {/* Development / Demo Quick Assist Box */}
           <div className="p-3 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-[11px] text-[#64748b] space-y-1">
             <div className="flex items-center justify-between text-[#334155] font-semibold">
-              <span>Development Mock Access</span>
-              <span className="text-[#10b981] font-mono">Phase 2</span>
+              <span>Administrator Access</span>
+              <span className="text-[#10b981] font-mono">v1.0 Production</span>
             </div>
             <p>
               Email: <code className="text-[#0f172a] font-mono font-medium">admin@silvercatering.in</code>

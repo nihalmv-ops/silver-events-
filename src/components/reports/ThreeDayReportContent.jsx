@@ -245,3 +245,4 @@ export function ThreeDayReportContent({ event, summary, dayStats = [] }) {
     </div>
   )
 }
+

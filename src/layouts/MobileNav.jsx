@@ -166,7 +166,7 @@ export function MobileNav({ isOpen, onClose }) {
         {/* Drawer Footer */}
         <div className="p-4 border-t border-[#1a3827] bg-[#0a1811] text-xs text-[#94a3b8] flex items-center justify-between">
           <span>Mobile Operations Hub</span>
-          <span className="text-[10px] text-[#c29c5e] font-semibold">Phase 2</span>
+          <span className="text-[10px] text-[#c29c5e] font-semibold">Production</span>
         </div>
       </div>
 

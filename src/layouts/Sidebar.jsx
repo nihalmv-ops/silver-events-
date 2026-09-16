@@ -145,7 +145,7 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }) {
                 Live Catering Active
               </span>
               <span className="text-[9px] text-[#9d8050] font-bold uppercase tracking-wider">
-                Phase 2
+                Production
               </span>
             </div>
             <p className="text-[10px] text-[#94a3b8] leading-tight font-light truncate">
