@@ -321,3 +321,4 @@ export function ExpenseModal({ isOpen, onClose, onSave, expense = null, defaultE
     </Modal>
   )
 }
+
