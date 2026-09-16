@@ -3,60 +3,65 @@ import { Modal } from '../ui/Modal'
 import { Input } from '../ui/Input'
 import { Button } from '../ui/Button'
 import {
-  ARRANGEMENT_CATEGORIES,
-  ARRANGEMENT_STATUSES,
-} from '../../hooks/useArrangements'
+  TASK_CATEGORIES,
+  TASK_STATUSES,
+  TASK_PRIORITIES,
+} from '../../hooks/useTasks'
 
-export function ArrangementModal({
+export function TaskModal({
   isOpen,
   onClose,
   onSave,
-  itemToEdit,
+  taskToEdit,
   events = [],
   currentEventId,
   currentDayNumber,
 }) {
-  const [category, setCategory] = useState(ARRANGEMENT_CATEGORIES[0])
-  const [title, setTitle] = useState('')
-  const [specification, setSpecification] = useState('')
+  const [task, setTask] = useState('')
+  const [category, setCategory] = useState(TASK_CATEGORIES[0])
   const [eventId, setEventId] = useState(currentEventId || '')
   const [dayNumber, setDayNumber] = useState(currentDayNumber || 1)
+  const [responsiblePerson, setResponsiblePerson] = useState('')
+  const [dueDate, setDueDate] = useState('')
+  const [priority, setPriority] = useState('Medium')
   const [status, setStatus] = useState('Pending')
-  const [vendor, setVendor] = useState('')
   const [notes, setNotes] = useState('')
 
   useEffect(() => {
-    if (itemToEdit) {
-      setCategory(itemToEdit.category || ARRANGEMENT_CATEGORIES[0])
-      setTitle(itemToEdit.title || '')
-      setSpecification(itemToEdit.specification || '')
-      setEventId(itemToEdit.eventId || currentEventId || '')
-      setDayNumber(itemToEdit.dayNumber || currentDayNumber || 1)
-      setStatus(itemToEdit.status || 'Pending')
-      setVendor(itemToEdit.vendor || '')
-      setNotes(itemToEdit.notes || '')
+    if (taskToEdit) {
+      setTask(taskToEdit.task || '')
+      setCategory(taskToEdit.category || TASK_CATEGORIES[0])
+      setEventId(taskToEdit.eventId || currentEventId || '')
+      setDayNumber(taskToEdit.dayNumber || currentDayNumber || 1)
+      setResponsiblePerson(taskToEdit.responsiblePerson || '')
+      setDueDate(taskToEdit.dueDate || new Date().toISOString().split('T')[0])
+      setPriority(taskToEdit.priority || 'Medium')
+      setStatus(taskToEdit.status || 'Pending')
+      setNotes(taskToEdit.notes || '')
     } else {
-      setCategory(ARRANGEMENT_CATEGORIES[0])
-      setTitle('')
-      setSpecification('')
+      setTask('')
+      setCategory(TASK_CATEGORIES[0])
       setEventId(currentEventId || (events[0]?.id ?? ''))
       setDayNumber(currentDayNumber || 1)
+      setResponsiblePerson('')
+      setDueDate(new Date().toISOString().split('T')[0])
+      setPriority('Medium')
       setStatus('Pending')
-      setVendor('')
       setNotes('')
     }
-  }, [itemToEdit, currentEventId, currentDayNumber, events, isOpen])
+  }, [taskToEdit, currentEventId, currentDayNumber, events, isOpen])
 
   const handleSubmit = (e) => {
     e.preventDefault()
     onSave({
+      task: task.trim(),
       category,
-      title: title.trim() || `${category} Setup`,
-      specification: specification.trim(),
       eventId,
       dayNumber: Number(dayNumber) || 1,
+      responsiblePerson: responsiblePerson.trim() || 'Operations Captain',
+      dueDate,
+      priority,
       status,
-      vendor: vendor.trim(),
       notes: notes.trim(),
     })
     onClose()
@@ -66,22 +71,30 @@ export function ArrangementModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={itemToEdit ? `Edit Arrangement — ${itemToEdit.category}` : 'Add Event Arrangement Checklist Item'}
-      description="Configure on-site venue facilities, stage, power, audio, lighting, and hospitality gear."
+      title={taskToEdit ? 'Edit Task / Action Item' : 'Add Operations Task'}
+      description="Assign actionable tasks across event coordination, kitchen prep, water, packing, or arrangements."
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          label="Task Description"
+          value={task}
+          onChange={(e) => setTask(e.target.value)}
+          placeholder="e.g. Confirm Water Quantity with Kaveri Aqua"
+          required
+        />
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[#0f172a] block">
-              Arrangement Category (18 Categories)
+              Operational Category (10 Categories)
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-[#e2e8f0] bg-white text-sm font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#163324]"
             >
-              {ARRANGEMENT_CATEGORIES.map((c) => (
+              {TASK_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -90,21 +103,13 @@ export function ArrangementModal({
           </div>
 
           <Input
-            label="Arrangement Task / Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. 125 kVA Silent Commercial Generator"
+            label="Responsible Person"
+            value={responsiblePerson}
+            onChange={(e) => setResponsiblePerson(e.target.value)}
+            placeholder="e.g. Capt. Pradeep Menon"
             required
           />
         </div>
-
-        <Input
-          label="Technical Specification & Requirements"
-          value={specification}
-          onChange={(e) => setSpecification(e.target.value)}
-          placeholder="e.g. Dual automatic transfer switch diesel generator for kitchen & single counter"
-          required
-        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
@@ -140,49 +145,72 @@ export function ArrangementModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Input
+            label="Target Due Date"
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            required
+          />
+
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[#0f172a] block">
-              Arrangement Status
+              Priority
+            </label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-[#e2e8f0] bg-white text-sm font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#163324]"
+            >
+              {TASK_PRIORITIES.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#0f172a] block">
+              Status
             </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="w-full px-3 py-2 rounded-lg border border-[#e2e8f0] bg-white text-sm font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#163324]"
             >
-              {ARRANGEMENT_STATUSES.map((st) => (
-                <option key={st} value={st}>
-                  {st}
+              {TASK_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
                 </option>
               ))}
             </select>
           </div>
-
-          <Input
-            label="Contractor / Vendor Responsible"
-            value={vendor}
-            onChange={(e) => setVendor(e.target.value)}
-            placeholder="e.g. Reliable Power Gensets"
-          />
         </div>
 
-        <Input
-          label="Operational Notes / Staging Check"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="e.g. Fully fueled with 250 liters diesel reserve"
-        />
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-[#0f172a] block">
+            Operational Notes / Action Details
+          </label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="e.g. Check barcode tokens and student union volunteer gate passes before opening."
+            rows={3}
+            className="w-full px-3 py-2 rounded-lg border border-[#e2e8f0] bg-white text-sm text-[#0f172a] placeholder-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#163324]"
+          />
+        </div>
 
         <div className="flex justify-end gap-2 pt-3 border-t border-[#e2e8f0]">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" variant="primary">
-            {itemToEdit ? 'Save Changes' : 'Add Arrangement Item'}
+            {taskToEdit ? 'Save Task' : 'Create Task'}
           </Button>
         </div>
       </form>
     </Modal>
   )
 }
-

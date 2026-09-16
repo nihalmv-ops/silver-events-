@@ -6,6 +6,7 @@ import { MenuProvider } from './context/MenuContext'
 import { StaffProvider } from './context/StaffContext'
 import { VendorProvider } from './context/VendorContext'
 import { ArrangementProvider } from './context/ArrangementContext'
+import { TaskProvider } from './context/TaskContext'
 import { AppRoutes } from './routes/AppRoutes'
 
 export function App() {
@@ -17,7 +18,9 @@ export function App() {
             <StaffProvider>
               <VendorProvider>
                 <ArrangementProvider>
-                  <AppRoutes />
+                  <TaskProvider>
+                    <AppRoutes />
+                  </TaskProvider>
                 </ArrangementProvider>
               </VendorProvider>
             </StaffProvider>
