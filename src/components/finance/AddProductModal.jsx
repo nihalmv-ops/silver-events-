@@ -144,3 +144,4 @@ export function AddProductModal({ isOpen, onClose }) {
     </Modal>
   )
 }
+
