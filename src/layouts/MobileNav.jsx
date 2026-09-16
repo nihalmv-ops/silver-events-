@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { navigationGroups } from '../data/navigation'
 import { Badge } from '../components/ui/Badge'
 import { cn } from '../utils/cn'
@@ -11,10 +11,16 @@ import {
   ChefHat,
   CheckSquare,
   Menu,
+  LogOut,
 } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
+import { useToast } from '../components/ui/ToastContext'
 
 export function MobileNav({ isOpen, onClose }) {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, logout } = useAuth()
+  const toast = useToast()
 
   // Auto close on route change
   useEffect(() => {
@@ -32,6 +38,13 @@ export function MobileNav({ isOpen, onClose }) {
       document.body.style.overflow = ''
     }
   }, [isOpen])
+
+  const handleLogout = () => {
+    logout()
+    toast.info('Signed Out', 'You have been signed out.')
+    navigate('/login', { replace: true })
+    onClose?.()
+  }
 
   return (
     <>
@@ -79,11 +92,31 @@ export function MobileNav({ isOpen, onClose }) {
           </button>
         </div>
 
+        {/* User Badge Bar */}
+        <div className="p-3 mx-4 mt-3 rounded-lg bg-[#142e20] border border-[#1e3a2b] flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 truncate">
+            <div className="w-6 h-6 rounded-full bg-[#163324] text-[#c29c5e] text-[10px] font-bold flex items-center justify-center shrink-0">
+              {user?.avatar || 'SC'}
+            </div>
+            <span className="text-white truncate font-medium text-[11px]">
+              {user?.email || 'admin@silvercatering.in'}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-[10px] text-[#ef4444] hover:underline flex items-center gap-1 font-semibold"
+          >
+            <LogOut className="w-3 h-3" />
+            Exit
+          </button>
+        </div>
+
         {/* Navigation List */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-5">
           {navigationGroups.map((group) => (
             <div key={group.title} className="space-y-1">
-              <h4 className="px-3 text-[10px] font-bold uppercase tracking-widest text-[#6c8777] mb-2">
+              <h4 className="px-3 text-[10px] font-bold uppercase tracking-widest text-[#6c8777] mb-1.5">
                 {group.title}
               </h4>
 
@@ -91,8 +124,8 @@ export function MobileNav({ isOpen, onClose }) {
                 {group.items.map((item) => {
                   const Icon = item.icon
                   const isActive =
-                    item.path === '/'
-                      ? location.pathname === '/'
+                    item.path === '/' || item.path === '/dashboard'
+                      ? location.pathname === '/' || location.pathname === '/dashboard'
                       : location.pathname.startsWith(item.path)
 
                   return (
@@ -100,7 +133,7 @@ export function MobileNav({ isOpen, onClose }) {
                       key={item.id}
                       to={item.path}
                       className={cn(
-                        'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors',
+                        'group flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors',
                         isActive
                           ? 'bg-[#1b3f2c] text-[#dfbe82] font-semibold'
                           : 'text-[#cbd5e1] hover:text-white hover:bg-[#142e20]'
@@ -133,7 +166,7 @@ export function MobileNav({ isOpen, onClose }) {
         {/* Drawer Footer */}
         <div className="p-4 border-t border-[#1a3827] bg-[#0a1811] text-xs text-[#94a3b8] flex items-center justify-between">
           <span>Mobile Operations Hub</span>
-          <span className="text-[10px] text-[#c29c5e] font-semibold">Phase 1</span>
+          <span className="text-[10px] text-[#c29c5e] font-semibold">Phase 2</span>
         </div>
       </div>
 
@@ -143,11 +176,11 @@ export function MobileNav({ isOpen, onClose }) {
         className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#0e1f16] border-t border-[#1a3827] z-30 flex items-center justify-around px-2 shadow-lg"
       >
         <NavLink
-          to="/"
+          to="/dashboard"
           className={({ isActive }) =>
             cn(
               'flex flex-col items-center justify-center w-14 py-1 rounded-lg text-[10px] font-medium transition-colors',
-              isActive ? 'text-[#c29c5e]' : 'text-[#94a3b8] hover:text-white'
+              isActive || location.pathname === '/' ? 'text-[#c29c5e]' : 'text-[#94a3b8] hover:text-white'
             )
           }
         >
@@ -206,4 +239,3 @@ export function MobileNav({ isOpen, onClose }) {
     </>
   )
 }
-

@@ -1,12 +1,23 @@
 import React from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { navigationGroups } from '../data/navigation'
 import { Badge } from '../components/ui/Badge'
 import { cn } from '../utils/cn'
-import { Sparkles, Utensils } from 'lucide-react'
+import { Sparkles, Utensils, LogOut } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
+import { useToast } from '../components/ui/ToastContext'
 
 export function Sidebar({ className, isCollapsed = false, onToggleCollapse }) {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, logout } = useAuth()
+  const toast = useToast()
+
+  const handleLogout = () => {
+    logout()
+    toast.info('Signed Out', 'You have been signed out.')
+    navigate('/login', { replace: true })
+  }
 
   return (
     <aside
@@ -53,8 +64,8 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }) {
               {group.items.map((item) => {
                 const Icon = item.icon
                 const isActive =
-                  item.path === '/'
-                    ? location.pathname === '/'
+                  item.path === '/' || item.path === '/dashboard'
+                    ? location.pathname === '/' || location.pathname === '/dashboard'
                     : location.pathname.startsWith(item.path)
 
                 return (
@@ -104,21 +115,41 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }) {
         ))}
       </div>
 
-      {/* Live Operations Footer Card */}
+      {/* Live Operations & User Footer */}
       {!isCollapsed && (
-        <div className="p-3 border-t border-[#1a3827] bg-[#0a1811]/90">
-          <div className="p-3 rounded-xl bg-[#142e20]/80 border border-[#234d37] space-y-2">
+        <div className="p-3 border-t border-[#1a3827] bg-[#0a1811]/90 space-y-2">
+          {/* User pill */}
+          <div className="flex items-center justify-between p-2 rounded-lg bg-[#142e20]/60 border border-[#1e3a2b] text-xs">
+            <div className="flex items-center gap-2 truncate">
+              <div className="w-6 h-6 rounded-full bg-[#163324] text-[#c29c5e] text-[10px] font-bold flex items-center justify-center shrink-0">
+                {user?.avatar || 'SC'}
+              </div>
+              <span className="text-[#cbd5e1] truncate font-medium text-[11px]">
+                {user?.email || 'admin@silvercatering.in'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="p-1 rounded text-[#94a3b8] hover:text-[#ef4444] transition-colors shrink-0"
+              title="Sign Out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-[#142e20]/80 border border-[#234d37] space-y-1">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[#e2e8f0]">
+              <span className="flex items-center gap-1.5 text-[10px] font-semibold text-[#e2e8f0]">
                 <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
                 Live Catering Active
               </span>
-              <span className="text-[10px] text-[#9d8050] font-bold uppercase tracking-wider">
-                Phase 1
+              <span className="text-[9px] text-[#9d8050] font-bold uppercase tracking-wider">
+                Phase 2
               </span>
             </div>
-            <p className="text-[11px] text-[#94a3b8] leading-tight font-light">
-              Kochi Central Kitchen & Lawns
+            <p className="text-[10px] text-[#94a3b8] leading-tight font-light truncate">
+              College Function (Day 1)
             </p>
           </div>
         </div>
@@ -126,4 +157,3 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }) {
     </aside>
   )
 }
-

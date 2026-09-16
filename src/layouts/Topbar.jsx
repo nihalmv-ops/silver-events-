@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Menu,
   Search,
@@ -7,19 +8,29 @@ import {
   Calendar,
   Plus,
   ShieldCheck,
+  LogOut,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { useToast } from '../components/ui/ToastContext'
+import { useAuth } from '../hooks/useAuth'
 
 export function Topbar({ onOpenMobileNav, onOpenQuickAction }) {
   const toast = useToast()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   const handleNotificationClick = () => {
     toast.info(
       'Operational Alert',
-      'Batch 2 Thalassery Chicken Biriyani hot boxes dispatched from central kitchen.'
+      'Food Delivered milestone reached: 7,450 / 10,000 pax served at College Function Day 1.'
     )
+  }
+
+  const handleLogout = () => {
+    logout()
+    toast.info('Session Ended', 'You have been logged out of Silver Catering Operations.')
+    navigate('/login', { replace: true })
   }
 
   return (
@@ -42,23 +53,23 @@ export function Topbar({ onOpenMobileNav, onOpenQuickAction }) {
           </div>
           <input
             type="text"
-            placeholder="Search events, menus, staff, tasks..."
+            placeholder="Search events, counters, batches, staff..."
             className="w-full pl-9 pr-4 py-1.5 text-xs bg-[#f8fafc] border border-[#e2e8f0] rounded-lg text-[#0f172a] placeholder:text-[#94a3b8] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#163324]/20 focus:border-[#163324] transition-all"
           />
         </div>
       </div>
 
-      {/* Right: Operational Status + Quick Action + Alerts + Admin Profile */}
+      {/* Right: Operational Status + Quick Action + Alerts + Admin Profile + Logout */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Active Event Status Pill (Desktop & Tablet) */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-[#f8fafc] border border-[#e2e8f0]">
           <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
           <span className="text-[11px] font-semibold text-[#0f172a]">
-            Grand Hyatt Kochi
+            College Function D1
           </span>
-          <span className="text-[10px] text-[#64748b]">• 1,450 Pax</span>
+          <span className="text-[10px] text-[#64748b]">• 10,000 Pax</span>
           <Badge variant="success" size="sm" className="text-[9px] py-0">
-            Live
+            Open
           </Badge>
         </div>
 
@@ -88,19 +99,29 @@ export function Topbar({ onOpenMobileNav, onOpenQuickAction }) {
         {/* Admin Profile */}
         <div className="flex items-center gap-2.5 pl-2 border-l border-[#e2e8f0]">
           <div className="w-8 h-8 rounded-full bg-[#163324] text-[#c29c5e] flex items-center justify-center font-bold text-xs shadow-sm">
-            SC
+            {user?.avatar || 'SC'}
           </div>
           <div className="hidden xl:flex flex-col text-left">
-            <span className="text-xs font-semibold text-[#0f172a] leading-tight">
-              Event Admin
+            <span className="text-xs font-semibold text-[#0f172a] leading-tight truncate max-w-[120px]">
+              {user?.name || 'Administrator'}
             </span>
             <span className="text-[10px] text-[#64748b] leading-tight">
-              Shift Operations
+              {user?.role || 'Shift Operations'}
             </span>
           </div>
+
+          {/* Logout Button */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="p-1.5 rounded-lg text-[#64748b] hover:text-[#ef4444] hover:bg-[#fef2f2] transition-colors ml-1"
+            title="Sign Out"
+            aria-label="Sign out of operations system"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>
   )
 }
-

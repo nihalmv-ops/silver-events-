@@ -60,3 +60,4 @@ npm run preview
   - Printouts (`/printouts`)
   - Settings (`/settings`)
 - **Operations Dashboard Preview**: Full operational metrics, today's live event showcase, expected guests, food prep, food packing, buffet delivery, water logs, and internal operational spend.
+

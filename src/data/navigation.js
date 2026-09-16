@@ -24,7 +24,7 @@ export const navigationGroups = [
       {
         id: 'dashboard',
         name: 'Dashboard',
-        path: '/',
+        path: '/dashboard',
         icon: LayoutDashboard,
         badge: 'Live',
         badgeVariant: 'success',
