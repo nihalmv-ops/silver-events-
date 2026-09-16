@@ -18,7 +18,10 @@ import {
   Tasks,
   Pending,
   Expenses,
+  SalesIncome,
+  FinancialSummary,
   Reports,
+  PrintReports,
   Printouts,
   Settings,
 } from '../pages'
@@ -47,7 +50,10 @@ export function AppRoutes() {
           <Route path="tasks" element={<Tasks />} />
           <Route path="pending" element={<Pending />} />
           <Route path="expenses" element={<Expenses />} />
+          <Route path="sales" element={<SalesIncome />} />
+          <Route path="financials" element={<FinancialSummary />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="print-reports" element={<PrintReports />} />
           <Route path="printouts" element={<Printouts />} />
           <Route path="settings" element={<Settings />} />
           {/* Wildcard redirect back to Dashboard */}

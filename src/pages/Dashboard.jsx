@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import {
   CalendarDays,
   Clock,
@@ -12,9 +13,12 @@ import {
   Droplets,
   CheckSquare,
   ReceiptText,
+  DollarSign,
+  TrendingUp,
   Flame,
   Sparkles,
   RefreshCw,
+  ArrowRight,
 } from 'lucide-react'
 import { PageHeader } from '../components/ui/PageHeader'
 import { StatCard } from '../components/ui/StatCard'
@@ -26,6 +30,7 @@ import { ActiveEventCard } from '../components/dashboard/ActiveEventCard'
 import { mockDashboardData } from '../data/mockDashboardData'
 import { formatNumber, formatCurrency } from '../utils/formatters'
 import { useToast } from '../components/ui/ToastContext'
+import { useFinance } from '../hooks/useFinance'
 
 const statIcons = {
   CalendarDays,
@@ -37,6 +42,10 @@ const statIcons = {
 export function Dashboard() {
   const { eventStats, activeEvent, todayOperations } = mockDashboardData
   const toast = useToast()
+  const { getDailyFinancials, getThreeDayFinancials } = useFinance()
+
+  const todayFinancials = getDailyFinancials('evt-college-3day', 1)
+  const threeDayFinancials = getThreeDayFinancials('evt-college-3day')
 
   const handleSync = () => {
     toast.success(
@@ -114,6 +123,170 @@ export function Dashboard() {
           </span>
         </div>
         <ActiveEventCard event={activeEvent} />
+      </div>
+
+      {/* Executive Event Financial Command Section (Phase 12) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[#475569] flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-[#163324]" />
+              Event Financial Command & Daily Yield
+            </h3>
+            <p className="text-xs text-[#64748b] mt-0.5">
+              Live meal portion sales, operations expenditure ledger, and net profit margins
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link to="/sales">
+              <Button variant="outline" size="sm" className="text-xs">
+                Sales Ledger
+              </Button>
+            </Link>
+            <Link to="/financials">
+              <Button variant="primary" size="sm" className="text-xs" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                Financial Summary
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* 6 Executive Financial KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
+          {/* 1. Today's Sales / Income */}
+          <Card className="p-4 bg-white border border-[#e2e8f0] hover:shadow-card-hover transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  Today's Sales
+                </p>
+                <p className="text-lg font-bold text-[#163324] mt-1 font-mono">
+                  {formatCurrency(todayFinancials.totalSales)}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-[#163324]/10 text-[#163324] flex items-center justify-center font-bold text-xs">
+                ₹
+              </div>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#f1f5f9] flex items-center justify-between text-[10px] text-[#64748b]">
+              <span>Day 1 Portions</span>
+              <span className="font-semibold text-[#163324]">5,000 Pax</span>
+            </div>
+          </Card>
+
+          {/* 2. Today's Expenses */}
+          <Card className="p-4 bg-white border border-[#e2e8f0] hover:shadow-card-hover transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  Today's Expenses
+                </p>
+                <p className="text-lg font-bold text-red-600 mt-1 font-mono">
+                  {formatCurrency(todayFinancials.totalExpenses)}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold">
+                <ReceiptText className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#f1f5f9] flex items-center justify-between text-[10px] text-[#64748b]">
+              <span>Raw Materials</span>
+              <span className="font-semibold text-red-600">Disbursed</span>
+            </div>
+          </Card>
+
+          {/* 3. Today's Net Income */}
+          <Card className="p-4 bg-white border border-[#e2e8f0] hover:shadow-card-hover transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  Today's Net Income
+                </p>
+                <p className="text-lg font-bold text-emerald-700 mt-1 font-mono">
+                  {formatCurrency(todayFinancials.netIncome)}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+                <TrendingUp className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#f1f5f9] flex items-center justify-between text-[10px] text-[#64748b]">
+              <span>Margin</span>
+              <span className="font-bold text-emerald-700">
+                {todayFinancials.totalSales > 0
+                  ? `${((todayFinancials.netIncome / todayFinancials.totalSales) * 100).toFixed(1)}%`
+                  : '0%'}
+              </span>
+            </div>
+          </Card>
+
+          {/* 4. 3-Day Total Sales / Income */}
+          <Card className="p-4 bg-white border border-[#e2e8f0] hover:shadow-card-hover transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  3-Day Total Sales
+                </p>
+                <p className="text-lg font-bold text-[#163324] mt-1 font-mono">
+                  {formatCurrency(threeDayFinancials.totalSales)}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-[#c29c5e]/20 text-[#b08b4e] flex items-center justify-center font-bold text-xs">
+                <Sparkles className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#f1f5f9] flex items-center justify-between text-[10px] text-[#64748b]">
+              <span>30,000 Pax</span>
+              <span className="font-semibold text-[#163324]">Biryani + Water</span>
+            </div>
+          </Card>
+
+          {/* 5. 3-Day Total Expenses */}
+          <Card className="p-4 bg-white border border-[#e2e8f0] hover:shadow-card-hover transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  3-Day Expenses
+                </p>
+                <p className="text-lg font-bold text-red-600 mt-1 font-mono">
+                  {formatCurrency(threeDayFinancials.totalExpenses)}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold">
+                <ReceiptText className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#f1f5f9] flex items-center justify-between text-[10px] text-[#64748b]">
+              <span>19 Categories</span>
+              <span className="font-semibold text-red-600">Reconciled</span>
+            </div>
+          </Card>
+
+          {/* 6. 3-Day Net Income */}
+          <Card className="p-4 bg-white border border-[#e2e8f0] hover:shadow-card-hover transition-all">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
+                  3-Day Net Income
+                </p>
+                <p className="text-lg font-bold text-emerald-700 mt-1 font-mono">
+                  {formatCurrency(threeDayFinancials.finalNetIncome)}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+                <TrendingUp className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#f1f5f9] flex items-center justify-between text-[10px] text-[#64748b]">
+              <span>Final Event Yield</span>
+              <span className="font-bold text-emerald-700">
+                {threeDayFinancials.totalSales > 0
+                  ? `${((threeDayFinancials.finalNetIncome / threeDayFinancials.totalSales) * 100).toFixed(1)}%`
+                  : '0%'}
+              </span>
+            </div>
+          </Card>
+        </div>
       </div>
 
       {/* Manager Operational Execution Section */}

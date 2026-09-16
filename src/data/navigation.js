@@ -12,8 +12,11 @@ import {
   CheckSquare,
   ClockAlert,
   ReceiptText,
+  DollarSign,
+  TrendingUp,
   BarChart3,
   Printer,
+  FileSpreadsheet,
   Settings,
 } from 'lucide-react'
 
@@ -106,7 +109,7 @@ export const navigationGroups = [
     ],
   },
   {
-    title: 'Operations Tracking',
+    title: 'Operations & Tasks',
     items: [
       {
         id: 'tasks',
@@ -124,12 +127,31 @@ export const navigationGroups = [
         badgeVariant: 'warning',
         description: 'Critical pending approvals, missing materials, and time-sensitive bottlenecks.',
       },
+    ],
+  },
+  {
+    title: 'Financial Management',
+    items: [
+      {
+        id: 'sales',
+        name: 'Sales & Income',
+        path: '/sales',
+        icon: DollarSign,
+        description: 'Event dish sales, product price control, and portion revenue logs.',
+      },
       {
         id: 'expenses',
         name: 'Expenses',
         path: '/expenses',
         icon: ReceiptText,
         description: 'Internal operations purchases, fuel, ice, temporary labor, and daily logistics costs.',
+      },
+      {
+        id: 'financials',
+        name: 'Financial Summary',
+        path: '/financials',
+        icon: TrendingUp,
+        description: 'Daily P&L statement, sales vs expense margins, and final event closing.',
       },
     ],
   },
@@ -144,10 +166,19 @@ export const navigationGroups = [
         description: 'Post-event consumption summaries, kitchen efficiency ratings, and wastage analysis.',
       },
       {
+        id: 'print-reports',
+        name: 'Print Reports',
+        path: '/print-reports',
+        icon: Printer,
+        badge: 'A4',
+        badgeVariant: 'gold',
+        description: 'Official A4 operational reports, daily sheets, and 3-day executive financial audits.',
+      },
+      {
         id: 'printouts',
         name: 'Printouts',
         path: '/printouts',
-        icon: Printer,
+        icon: FileSpreadsheet,
         description: 'Kitchen prep sheets, packing checklists, delivery gate passes, and crew allocations.',
       },
       {
@@ -162,4 +193,3 @@ export const navigationGroups = [
 ]
 
 export const allNavItems = navigationGroups.flatMap((group) => group.items)
-

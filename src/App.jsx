@@ -8,6 +8,7 @@ import { VendorProvider } from './context/VendorContext'
 import { ArrangementProvider } from './context/ArrangementContext'
 import { TaskProvider } from './context/TaskContext'
 import { ExpenseProvider } from './context/ExpenseContext'
+import { FinanceProvider } from './context/FinanceContext'
 import { AppRoutes } from './routes/AppRoutes'
 
 export function App() {
@@ -21,7 +22,9 @@ export function App() {
                 <ArrangementProvider>
                   <TaskProvider>
                     <ExpenseProvider>
-                      <AppRoutes />
+                      <FinanceProvider>
+                        <AppRoutes />
+                      </FinanceProvider>
                     </ExpenseProvider>
                   </TaskProvider>
                 </ArrangementProvider>
