@@ -117,3 +117,4 @@ export function ReportIssueModal({ isOpen, onClose, onReport, counterName }) {
     </Modal>
   )
 }
+
