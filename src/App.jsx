@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ToastProvider } from './components/ui/ToastContext'
 import { EventProvider } from './context/EventContext'
 import { MenuProvider } from './context/MenuContext'
 import { StaffProvider } from './context/StaffContext'
@@ -15,23 +16,25 @@ export function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <EventProvider>
-          <MenuProvider>
-            <StaffProvider>
-              <VendorProvider>
-                <ArrangementProvider>
-                  <TaskProvider>
-                    <ExpenseProvider>
-                      <FinanceProvider>
-                        <AppRoutes />
-                      </FinanceProvider>
-                    </ExpenseProvider>
-                  </TaskProvider>
-                </ArrangementProvider>
-              </VendorProvider>
-            </StaffProvider>
-          </MenuProvider>
-        </EventProvider>
+        <ToastProvider>
+          <EventProvider>
+            <MenuProvider>
+              <StaffProvider>
+                <VendorProvider>
+                  <ArrangementProvider>
+                    <TaskProvider>
+                      <ExpenseProvider>
+                        <FinanceProvider>
+                          <AppRoutes />
+                        </FinanceProvider>
+                      </ExpenseProvider>
+                    </TaskProvider>
+                  </ArrangementProvider>
+                </VendorProvider>
+              </StaffProvider>
+            </MenuProvider>
+          </EventProvider>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   )

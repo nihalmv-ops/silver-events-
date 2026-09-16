@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import { MobileNav } from './MobileNav'
-import { ToastProvider, useToast } from '../components/ui/ToastContext'
+import { useToast } from '../components/ui/ToastContext'
 import { Modal } from '../components/ui/Modal'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -143,10 +143,6 @@ function AdminLayoutInner() {
 }
 
 export function AdminLayout() {
-  return (
-    <ToastProvider>
-      <AdminLayoutInner />
-    </ToastProvider>
-  )
+  return <AdminLayoutInner />
 }
 
