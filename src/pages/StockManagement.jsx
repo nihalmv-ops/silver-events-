@@ -524,3 +524,4 @@ export function StockManagement() {
   )
 }
 export default StockManagement
+

@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Printer,
   FileText,
@@ -29,7 +30,7 @@ export const PHASE12_REPORTS = [
   {
     id: 'day1',
     title: 'Day 1 Operations & Financial Report',
-    description: 'Complete Day 1 single-counter food distribution, 250ml water logs, daily sales portions, and operating expense ledger.',
+    description: 'Complete Day 1 single-counter food distribution (Biryani 4,700 sold, Popcorn 1,800 sold, Water 4,500 sold), daily sales ₹826,500, and operating expenses.',
     badge: 'Day 1 Specific',
     badgeVariant: 'gold',
     icon: Calendar,
@@ -37,7 +38,7 @@ export const PHASE12_REPORTS = [
   {
     id: 'day2',
     title: 'Day 2 Operations & Financial Report',
-    description: 'Complete Day 2 central kitchen yield, thermal carrier dispatch, beverage count, and daily net revenue statement.',
+    description: 'Complete Day 2 central kitchen yield, single-counter serving (Biryani 5,000 sold, Popcorn 2,000 sold, Water 4,800 sold), and daily net revenue statement.',
     badge: 'Day 2 Specific',
     badgeVariant: 'gold',
     icon: Calendar,
@@ -45,7 +46,7 @@ export const PHASE12_REPORTS = [
   {
     id: 'day3',
     title: 'Day 3 Operations & Financial Report',
-    description: 'Final event day food portions, single counter peak serving pass-through, daily costs, and day 3 closing ledger.',
+    description: 'Final event day food portions (Biryani 4,800 sold, Popcorn 1,900 sold, Water 4,700 sold), daily costs, and day 3 closing ledger.',
     badge: 'Day 3 Specific',
     badgeVariant: 'gold',
     icon: Calendar,
@@ -53,7 +54,7 @@ export const PHASE12_REPORTS = [
   {
     id: 'complete-3day',
     title: 'Complete 3-Day Event Report',
-    description: 'Master 30,000-guest event operations audit, 3-day biryani & water consumption, total sales, expenses, and final net profit.',
+    description: 'Master 30,000-guest event operations audit, 3-day biryani, popcorn & water consumption, total sales ₹2,556,000, and final net profit.',
     badge: 'Master Audit',
     badgeVariant: 'success',
     icon: Sparkles,
@@ -61,7 +62,7 @@ export const PHASE12_REPORTS = [
   {
     id: 'financial-summary',
     title: 'Executive Financial Summary Report',
-    description: 'High-level P&L statement comparing Day 1, Day 2, Day 3 and grand totals with 19 expense category distributions.',
+    description: 'High-level P&L statement comparing Day 1, Day 2, Day 3 and grand totals with operational expense category distributions.',
     badge: 'P&L Statement',
     badgeVariant: 'warning',
     icon: TrendingUp,
@@ -86,14 +87,19 @@ export const PHASE12_REPORTS = [
 
 export function PrintReports() {
   const toast = useToast()
+  const [searchParams] = useSearchParams()
   const { events, activeEventId } = useEvents()
   const { getDailyFinancials, getThreeDayFinancials } = useFinance()
   const { expenses } = useExpenses()
   const { tasks } = useTasks()
 
-  // State
+  // Parse search params: support ?report=day1 or ?day=1
+  const reportQuery =
+    searchParams.get('report') ||
+    (searchParams.get('day') ? `day${searchParams.get('day')}` : null)
+
   const [selectedEventId, setSelectedEventId] = useState(activeEventId || 'evt-college-3day')
-  const [activeReportId, setActiveReportId] = useState(null) // null shows directory; id shows preview
+  const [activeReportId, setActiveReportId] = useState(reportQuery || null)
 
   const currentEvent = useMemo(() => {
     return events.find((e) => e.id === selectedEventId) || events[0]
@@ -103,6 +109,23 @@ export function PrintReports() {
   const day2Fin = useMemo(() => getDailyFinancials(selectedEventId, 2), [getDailyFinancials, selectedEventId])
   const day3Fin = useMemo(() => getDailyFinancials(selectedEventId, 3), [getDailyFinancials, selectedEventId])
   const threeDayFin = useMemo(() => getThreeDayFinancials(selectedEventId), [getThreeDayFinancials, selectedEventId])
+
+  // Auto-print if query param autoprint=true
+  useEffect(() => {
+    if (searchParams.get('autoprint') === 'true' && activeReportId) {
+      const timer = setTimeout(() => {
+        window.print()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [searchParams, activeReportId])
+
+  // Update activeReportId if URL searchParams changes
+  useEffect(() => {
+    if (reportQuery) {
+      setActiveReportId(reportQuery)
+    }
+  }, [reportQuery])
 
   // Handlers
   const handleView = (reportId) => {
@@ -114,7 +137,7 @@ export function PrintReports() {
     setActiveReportId(reportId)
     setTimeout(() => {
       window.print()
-    }, 300)
+    }, 400)
   }
 
   const handleDownloadPdf = (reportId) => {
@@ -125,7 +148,7 @@ export function PrintReports() {
     )
     setTimeout(() => {
       window.print()
-    }, 400)
+    }, 450)
   }
 
   return (
@@ -158,14 +181,24 @@ export function PrintReports() {
                 </Button>
               </div>
             ) : (
-              <Button
-                variant="primary"
-                size="sm"
-                leftIcon={<Sparkles className="w-4 h-4 text-[#c29c5e]" />}
-                onClick={() => handlePrint('complete-3day')}
-              >
-                Quick Print 3-Day Report
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={<Printer className="w-4 h-4" />}
+                  onClick={() => handlePrint('day1')}
+                >
+                  Print Day 1 Report
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  leftIcon={<Sparkles className="w-4 h-4 text-[#c29c5e]" />}
+                  onClick={() => handlePrint('complete-3day')}
+                >
+                  Print 3-Day Master Audit
+                </Button>
+              </div>
             )
           }
         />
@@ -198,7 +231,7 @@ export function PrintReports() {
                   Report Preview Active
                 </p>
                 <h4 className="text-sm font-bold text-white">
-                  {PHASE12_REPORTS.find((r) => r.id === activeReportId)?.title}
+                  {PHASE12_REPORTS.find((r) => r.id === activeReportId)?.title || 'Operational Report'}
                 </h4>
               </div>
             </div>
@@ -252,7 +285,11 @@ export function PrintReports() {
             return (
               <Card
                 key={report.id}
-                className="p-5 border border-[#e2e8f0] hover:border-[#163324] hover:shadow-md transition-all flex flex-col justify-between"
+                className={`p-5 border transition-all flex flex-col justify-between ${
+                  report.id === 'day1'
+                    ? 'border-[#163324] bg-emerald-50/20 shadow-xs'
+                    : 'border-[#e2e8f0] hover:border-[#163324] hover:shadow-md'
+                }`}
               >
                 <div>
                   <div className="flex items-start justify-between mb-3">
@@ -310,7 +347,23 @@ export function PrintReports() {
           })}
         </div>
       )}
+
+      {/* Fallback printable document for physical printing if on directory view */}
+      {!activeReportId && (
+        <div className="hidden print:block">
+          <Phase12ReportTemplate
+            reportType="day1"
+            event={currentEvent}
+            day1Fin={day1Fin}
+            day2Fin={day2Fin}
+            day3Fin={day3Fin}
+            threeDayFin={threeDayFin}
+            expenses={expenses}
+            tasks={tasks}
+          />
+        </div>
+      )}
     </div>
   )
 }
-
+export default PrintReports

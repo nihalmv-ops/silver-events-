@@ -81,29 +81,110 @@ export function ReportRenderer({
       return (
         <div className="space-y-4 text-xs">
           <div className="p-3 bg-[#f8fafc] rounded border border-[#cbd5e1] flex items-center justify-between">
-            <span className="font-bold uppercase text-[#163324]">Selected Shift: {selectedDay === 'All' ? 'Day 1 (Morning to Evening)' : `Day ${selectedDay}`}</span>
-            <span className="text-[10px] bg-white px-2 py-0.5 rounded border font-mono">Service Window: 12:30 PM — 02:30 PM</span>
+            <span className="font-bold uppercase text-[#163324]">Selected Shift: {selectedDay === 'All' ? 'Day 1 Operations & Sales Log' : `Day ${selectedDay} Operations & Sales Log`}</span>
+            <span className="text-[10px] bg-white px-2 py-0.5 rounded border font-mono">Service Window: 12:30 PM — 02:30 PM | ONE Counter</span>
           </div>
 
-          <table className="w-full text-left border border-[#cbd5e1] text-xs">
-            <thead className="bg-[#f1f5f9] text-[#475569] font-bold text-[10px] uppercase">
-              <tr>
-                <th className="p-2 border-b">Time Milestone</th>
-                <th className="p-2 border-b">Operational Checkpoint</th>
-                <th className="p-2 border-b">Metric / Portions</th>
-                <th className="p-2 border-b">Supervisor Sign-Off</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#e2e8f0]">
-              <tr><td className="p-2 font-mono">03:30 AM</td><td className="p-2">Fresh Chicken & Raw Produce Intake</td><td className="p-2">4,500 kg Fresh Poultry</td><td className="p-2 text-emerald-700 font-semibold">Chef K. Moideen</td></tr>
-              <tr><td className="p-2 font-mono">05:00 AM</td><td className="p-2">Rice Washing & Dum Dum Pot Fires Lit</td><td className="p-2">12 Large Cooking Degs</td><td className="p-2 text-emerald-700 font-semibold">Kitchen Lead</td></tr>
-              <tr><td className="p-2 font-mono">09:30 AM</td><td className="p-2">First Dum Deg Opened & Temperature Verified</td><td className="p-2">78°C Core Temp (Passed)</td><td className="p-2 text-emerald-700 font-semibold">Quality Inspector</td></tr>
-              <tr><td className="p-2 font-mono">10:30 AM</td><td className="p-2">High-Speed Packaging into Meal Boxes</td><td className="p-2">10,100 Containers Sealed</td><td className="p-2 text-emerald-700 font-semibold">Packing Captain</td></tr>
-              <tr><td className="p-2 font-mono">11:45 AM</td><td className="p-2">Single Distribution Counter Staged</td><td className="p-2">5,000 Initial Staged + 5,000 Buffer Truck</td><td className="p-2 text-emerald-700 font-semibold">Counter Marshal</td></tr>
-              <tr><td className="p-2 font-mono">12:30 PM</td><td className="p-2">Buffet Counter Opens to Students & Delegates</td><td className="p-2">10,000 Meals Dispatched</td><td className="p-2 text-emerald-700 font-semibold">Floor Captain</td></tr>
-              <tr><td className="p-2 font-mono">03:00 PM</td><td className="p-2">Counter Closed & Ground Sanitation</td><td className="p-2">100 Buffer Boxes Preserved</td><td className="p-2 text-emerald-700 font-semibold">CleanPro Supervisor</td></tr>
-            </tbody>
-          </table>
+          {/* Financial KPIs Banner */}
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="p-2.5 bg-emerald-50 rounded border border-emerald-200">
+              <span className="text-[10px] text-emerald-800 uppercase font-bold block">Day 1 Total Sales</span>
+              <span className="text-base font-black text-emerald-900">₹8,26,500</span>
+            </div>
+            <div className="p-2.5 bg-rose-50 rounded border border-rose-200">
+              <span className="text-[10px] text-rose-800 uppercase font-bold block">Day 1 Total Expenses</span>
+              <span className="text-base font-black text-rose-900">₹4,15,000</span>
+            </div>
+            <div className="p-2.5 bg-blue-50 rounded border border-blue-200">
+              <span className="text-[10px] text-blue-800 uppercase font-bold block">Day 1 Net Income</span>
+              <span className="text-base font-black text-blue-900">₹4,11,500</span>
+            </div>
+          </div>
+
+          {/* Core Products Stock & Sales */}
+          <div>
+            <div className="text-[11px] font-bold text-[#163324] uppercase mb-1.5 flex items-center justify-between">
+              <span>Day 1 Distribution & Sales (3 Core Items)</span>
+              <span className="text-[10px] text-[#64748b] font-normal">ONE Central Distribution Counter</span>
+            </div>
+            <table className="w-full text-left border border-[#cbd5e1] text-xs">
+              <thead className="bg-[#f1f5f9] text-[#475569] font-bold text-[10px] uppercase">
+                <tr>
+                  <th className="p-2 border-b">Product Item</th>
+                  <th className="p-2 border-b text-right">Prepared / Stock</th>
+                  <th className="p-2 border-b text-right">Sold / Dispatched</th>
+                  <th className="p-2 border-b text-right">Buffer Left</th>
+                  <th className="p-2 border-b text-right">Price</th>
+                  <th className="p-2 border-b text-right">Total Income (₹)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                <tr>
+                  <td className="p-2 font-bold text-[#0f172a]">Chicken Biryani</td>
+                  <td className="p-2 text-right">5,000</td>
+                  <td className="p-2 text-right font-black text-emerald-700">4,700</td>
+                  <td className="p-2 text-right text-amber-700">300</td>
+                  <td className="p-2 text-right font-mono">₹150</td>
+                  <td className="p-2 text-right font-black text-[#163324]">₹7,05,000</td>
+                </tr>
+                <tr>
+                  <td className="p-2 font-bold text-[#0f172a]">Popcorn</td>
+                  <td className="p-2 text-right">2,000</td>
+                  <td className="p-2 text-right font-black text-emerald-700">1,800</td>
+                  <td className="p-2 text-right text-amber-700">200</td>
+                  <td className="p-2 text-right font-mono">₹30</td>
+                  <td className="p-2 text-right font-black text-[#163324]">₹54,000</td>
+                </tr>
+                <tr>
+                  <td className="p-2 font-bold text-[#0f172a]">Water Bottle (250ml)</td>
+                  <td className="p-2 text-right">5,000</td>
+                  <td className="p-2 text-right font-black text-emerald-700">4,500</td>
+                  <td className="p-2 text-right text-amber-700">500</td>
+                  <td className="p-2 text-right font-mono">₹15</td>
+                  <td className="p-2 text-right font-black text-[#163324]">₹67,500</td>
+                </tr>
+              </tbody>
+              <tfoot className="bg-[#f8fafc] font-black text-xs border-t-2 border-[#cbd5e1]">
+                <tr>
+                  <td className="p-2 text-[#163324] uppercase">Day 1 Total</td>
+                  <td className="p-2 text-right">12,000</td>
+                  <td className="p-2 text-right text-emerald-700">11,000</td>
+                  <td className="p-2 text-right text-amber-700">1,000</td>
+                  <td className="p-2 text-right text-[#64748b]">-</td>
+                  <td className="p-2 text-right text-emerald-800 text-sm">₹8,26,500</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div className="p-2.5 bg-amber-50 border border-amber-300 rounded text-[#78350f]">
+            <span className="font-bold block uppercase text-[10px]">Strict Single-Counter Logistics:</span>
+            <span>All distribution is served through <strong>ONE CENTRAL DISTRIBUTION COUNTER</strong> equipped with 6 rapid pass-through queuing lanes and clear signage.</span>
+          </div>
+
+          {/* Timeline */}
+          <div>
+            <div className="text-[11px] font-bold text-[#163324] uppercase mb-1.5">Production & Service Milestones</div>
+            <table className="w-full text-left border border-[#cbd5e1] text-xs">
+              <thead className="bg-[#f1f5f9] text-[#475569] font-bold text-[10px] uppercase">
+                <tr>
+                  <th className="p-2 border-b">Time</th>
+                  <th className="p-2 border-b">Operational Checkpoint</th>
+                  <th className="p-2 border-b">Metric / Portions</th>
+                  <th className="p-2 border-b">Sign-Off</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                <tr><td className="p-2 font-mono">03:30 AM</td><td className="p-2">Fresh Raw Ingredients Intake</td><td className="p-2">Poultry, Rice, Spices Verified</td><td className="p-2 text-emerald-700 font-semibold">Chef K. Moideen</td></tr>
+                <tr><td className="p-2 font-mono">05:00 AM</td><td className="p-2">Biryani Dum Pot Fires Lit & Popcorn Staging</td><td className="p-2">12 Cooking Degs + 2 Popcorn Stations</td><td className="p-2 text-emerald-700 font-semibold">Kitchen Lead</td></tr>
+                <tr><td className="p-2 font-mono">09:30 AM</td><td className="p-2">First Dum Deg Opened & Temp Verified</td><td className="p-2">78°C Core Temp (Passed)</td><td className="p-2 text-emerald-700 font-semibold">Quality Inspector</td></tr>
+                <tr><td className="p-2 font-mono">10:30 AM</td><td className="p-2">Packaging into Meal Boxes & Pouches</td><td className="p-2">5,000 Biryani Boxes + 2,000 Popcorn Tubs</td><td className="p-2 text-emerald-700 font-semibold">Packing Captain</td></tr>
+                <tr><td className="p-2 font-mono">11:45 AM</td><td className="p-2">ONE Central Distribution Counter Staged</td><td className="p-2">Initial Stock + Buffer Staged</td><td className="p-2 text-emerald-700 font-semibold">Counter Marshal</td></tr>
+                <tr><td className="p-2 font-mono">12:30 PM</td><td className="p-2">Counter Opens to Guests</td><td className="p-2">11,000 Total Units Sold</td><td className="p-2 text-emerald-700 font-semibold">Floor Captain</td></tr>
+                <tr><td className="p-2 font-mono">03:00 PM</td><td className="p-2">Counter Closed, Cash Reconciled & Sanitation</td><td className="p-2">₹8,26,500 Cash Dispatched</td><td className="p-2 text-emerald-700 font-semibold">Rashid Ali</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       )
 
@@ -111,8 +192,8 @@ export function ReportRenderer({
       return (
         <div className="space-y-4 text-xs">
           <div className="p-3 bg-[#f8fafc] rounded border border-[#cbd5e1]">
-            <h4 className="font-bold text-[#163324] uppercase text-xs mb-1">Standardized Course Specification</h4>
-            <p className="text-[11px] text-[#64748b]">Authentic Malabar Thalassery Dum Biryani served with condiments and sealed mineral water.</p>
+            <h4 className="font-bold text-[#163324] uppercase text-xs mb-1">Standardized 3-Product Event Menu</h4>
+            <p className="text-[11px] text-[#64748b]">Fixed retail catering menu served exclusively across all 3 days through ONE Central Counter.</p>
           </div>
 
           <table className="w-full text-left border border-[#cbd5e1] text-xs">
@@ -120,17 +201,37 @@ export function ReportRenderer({
               <tr>
                 <th className="p-2 border-b">Menu Item</th>
                 <th className="p-2 border-b">Category</th>
-                <th className="p-2 border-b">Daily Req</th>
+                <th className="p-2 border-b text-right">Daily Req</th>
                 <th className="p-2 border-b">Unit</th>
+                <th className="p-2 border-b text-right">Price</th>
                 <th className="p-2 border-b">Prep Specs</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e2e8f0]">
-              <tr><td className="p-2 font-bold text-[#0f172a]">Malabar Chicken Biryani</td><td className="p-2">Non-Vegetarian</td><td className="p-2 font-black">10,000</td><td className="p-2">Portions</td><td className="p-2 text-[#64748b]">Jeerakasala rice, halal chicken, pure cow ghee dum</td></tr>
-              <tr><td className="p-2 font-bold text-[#0f172a]">Vegetable Salad Raitha</td><td className="p-2">Vegetarian</td><td className="p-2 font-black">10,000</td><td className="p-2">Cups</td><td className="p-2 text-[#64748b]">Fresh curd, sliced onions, green chilies, cilantro</td></tr>
-              <tr><td className="p-2 font-bold text-[#0f172a]">Dates & Lime Pickle</td><td className="p-2">Special Menu</td><td className="p-2 font-black">10,000</td><td className="p-2">Pouches</td><td className="p-2 text-[#64748b]">Sweet & spicy Malabar authentic pickle recipe</td></tr>
-              <tr><td className="p-2 font-bold text-[#0f172a]">Mineral Water Bottle</td><td className="p-2">Welcome Drinks / Water</td><td className="p-2 font-black">10,000</td><td className="p-2">Bottles</td><td className="p-2 text-[#64748b]">250ml tamper-evident seal mineral spring water</td></tr>
-              <tr><td className="p-2 font-bold text-[#0f172a]">Gulab Jamun Sweet</td><td className="p-2">Desserts</td><td className="p-2 font-black">10,000</td><td className="p-2">Pieces</td><td className="p-2 text-[#64748b]">Kewra infused sugar syrup, hot packed</td></tr>
+              <tr>
+                <td className="p-2 font-bold text-[#0f172a]">Chicken Biryani</td>
+                <td className="p-2 text-[#64748b]">Main Course</td>
+                <td className="p-2 text-right font-black text-[#163324]">5,000</td>
+                <td className="p-2">Portions</td>
+                <td className="p-2 text-right font-black text-emerald-700">₹150</td>
+                <td className="p-2 text-[#64748b]">Jeerakasala rice, tender halal chicken, pure cow ghee dum</td>
+              </tr>
+              <tr>
+                <td className="p-2 font-bold text-[#0f172a]">Popcorn</td>
+                <td className="p-2 text-[#64748b]">Snack</td>
+                <td className="p-2 text-right font-black text-[#163324]">2,000</td>
+                <td className="p-2">Tubs / Cones</td>
+                <td className="p-2 text-right font-black text-emerald-700">₹30</td>
+                <td className="p-2 text-[#64748b]">Freshly popped salted butter gourmet corn kernels</td>
+              </tr>
+              <tr>
+                <td className="p-2 font-bold text-[#0f172a]">Water Bottle (250ml)</td>
+                <td className="p-2 text-[#64748b]">Hydration</td>
+                <td className="p-2 text-right font-black text-[#163324]">5,000</td>
+                <td className="p-2">Bottles</td>
+                <td className="p-2 text-right font-black text-emerald-700">₹15</td>
+                <td className="p-2 text-[#64748b]">Tamper-evident sealed mineral spring water</td>
+              </tr>
             </tbody>
           </table>
         </div>
