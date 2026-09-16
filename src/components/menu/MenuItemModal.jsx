@@ -125,3 +125,4 @@ export function MenuItemModal({ isOpen, onClose, onSave, itemToEdit = null }) {
     </Modal>
   )
 }
+

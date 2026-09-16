@@ -2,7 +2,20 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 const EventContext = createContext(null)
 
-const STORAGE_KEY = 'silver_catering_events_data_v4'
+const STORAGE_KEY = 'silver_catering_events_data_v5'
+
+export const BATCH_STATUSES = [
+  'Pending',
+  'Preparing',
+  'Ready',
+  'Quality Checked',
+  'Packed',
+  'Ready for Distribution',
+  'Dispatched',
+  'Completed',
+]
+
+export const QUALITY_CHECK_STATUSES = ['Pending', 'Pass', 'Failed']
 
 // Realistic initial seed data featuring the 3-Day College Event (30,000 pax)
 const INITIAL_EVENTS = [
@@ -40,6 +53,53 @@ const INITIAL_EVENTS = [
         waterRemaining: 2200,
         counterStatus: 'OPEN',
         expenses: 124000,
+        foodPrep: {
+          requiredMeals: 10000,
+          preparedMeals: 10000,
+          qualityChecked: 9950,
+          rejectedMeals: 50,
+        },
+        foodPacking: {
+          requiredContainers: 200,
+          packedContainers: 196,
+          damagedContainers: 2,
+          containerType: 'Insulated Thermal Hot-Box (50 Pax)',
+        },
+        batches: [
+          {
+            id: 'b-d1-01',
+            batchNumber: 'Batch 01',
+            quantity: 3500,
+            preparationStatus: 'Completed',
+            qualityCheck: 'Pass',
+            packingStatus: 'Packed',
+            readyStatus: 'Ready',
+            dispatchStatus: 'Dispatched',
+            notes: 'Cauldrons 1-14. Dum cooked, aroma & chicken tenderness verified.',
+          },
+          {
+            id: 'b-d1-02',
+            batchNumber: 'Batch 02',
+            quantity: 3500,
+            preparationStatus: 'Quality Checked',
+            qualityCheck: 'Pass',
+            packingStatus: 'Packed',
+            readyStatus: 'Ready',
+            dispatchStatus: 'Ready for Distribution',
+            notes: 'Cauldrons 15-28. Thermal core temp 75°C, sealed in hot boxes.',
+          },
+          {
+            id: 'b-d1-03',
+            batchNumber: 'Batch 03',
+            quantity: 3000,
+            preparationStatus: 'Preparing',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Cauldrons 29-40 simmering on low flame for afternoon rush.',
+          },
+        ],
         menu: [
           {
             id: 'm-d1-1',
@@ -86,7 +146,7 @@ const INITIAL_EVENTS = [
         expectedGuests: 10000,
         foodRequired: '10,000 Pax Chicken Biryani',
         foodItem: 'Chicken Biryani with Raitha, Pickle & Pappadam',
-        foodPrepared: 10000,
+        foodPrepared: 4000,
         foodPacked: 2400,
         foodDelivered: 0,
         foodRemaining: 10000,
@@ -96,6 +156,53 @@ const INITIAL_EVENTS = [
         waterRemaining: 8500,
         counterStatus: 'SCHEDULED',
         expenses: 138000,
+        foodPrep: {
+          requiredMeals: 10000,
+          preparedMeals: 4000,
+          qualityChecked: 3500,
+          rejectedMeals: 20,
+        },
+        foodPacking: {
+          requiredContainers: 200,
+          packedContainers: 48,
+          damagedContainers: 1,
+          containerType: 'Insulated Thermal Hot-Box (50 Pax)',
+        },
+        batches: [
+          {
+            id: 'b-d2-01',
+            batchNumber: 'Batch 01',
+            quantity: 3500,
+            preparationStatus: 'Quality Checked',
+            qualityCheck: 'Pass',
+            packingStatus: 'Packed',
+            readyStatus: 'Ready',
+            dispatchStatus: 'Ready for Distribution',
+            notes: 'Early morning shift cauldrons 1-14 loaded in thermal van.',
+          },
+          {
+            id: 'b-d2-02',
+            batchNumber: 'Batch 02',
+            quantity: 3500,
+            preparationStatus: 'Preparing',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Mid-morning cauldrons 15-28 boiling on main stove lines.',
+          },
+          {
+            id: 'b-d2-03',
+            batchNumber: 'Batch 03',
+            quantity: 3000,
+            preparationStatus: 'Pending',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Scheduled for 11:30 AM fire-up.',
+          },
+        ],
         menu: [
           {
             id: 'm-d2-1',
@@ -146,6 +253,53 @@ const INITIAL_EVENTS = [
         waterRemaining: 10000,
         counterStatus: 'PLANNED',
         expenses: 115000,
+        foodPrep: {
+          requiredMeals: 10000,
+          preparedMeals: 0,
+          qualityChecked: 0,
+          rejectedMeals: 0,
+        },
+        foodPacking: {
+          requiredContainers: 200,
+          packedContainers: 0,
+          damagedContainers: 0,
+          containerType: 'Insulated Thermal Hot-Box (50 Pax)',
+        },
+        batches: [
+          {
+            id: 'b-d3-01',
+            batchNumber: 'Batch 01',
+            quantity: 3500,
+            preparationStatus: 'Pending',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Scheduled for Day 3 early morning fire-up.',
+          },
+          {
+            id: 'b-d3-02',
+            batchNumber: 'Batch 02',
+            quantity: 3500,
+            preparationStatus: 'Pending',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Scheduled for Day 3 mid-morning.',
+          },
+          {
+            id: 'b-d3-03',
+            batchNumber: 'Batch 03',
+            quantity: 3000,
+            preparationStatus: 'Pending',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Scheduled for Day 3 afternoon buffer.',
+          },
+        ],
         menu: [
           {
             id: 'm-d3-1',
@@ -212,6 +366,42 @@ const INITIAL_EVENTS = [
         waterRemaining: 0,
         counterStatus: 'CLOSED',
         expenses: 68500,
+        foodPrep: {
+          requiredMeals: 1450,
+          preparedMeals: 1450,
+          qualityChecked: 1450,
+          rejectedMeals: 0,
+        },
+        foodPacking: {
+          requiredContainers: 30,
+          packedContainers: 30,
+          damagedContainers: 0,
+          containerType: 'Insulated Thermal Hot-Box (50 Pax)',
+        },
+        batches: [
+          {
+            id: 'b-w-01',
+            batchNumber: 'Batch 01',
+            quantity: 750,
+            preparationStatus: 'Completed',
+            qualityCheck: 'Pass',
+            packingStatus: 'Packed',
+            readyStatus: 'Ready',
+            dispatchStatus: 'Completed',
+            notes: 'Ballroom initial service.',
+          },
+          {
+            id: 'b-w-02',
+            batchNumber: 'Batch 02',
+            quantity: 700,
+            preparationStatus: 'Completed',
+            qualityCheck: 'Pass',
+            packingStatus: 'Packed',
+            readyStatus: 'Ready',
+            dispatchStatus: 'Completed',
+            notes: 'Lakeside lawns evening service.',
+          },
+        ],
         menu: [
           {
             id: 'm-w-1',
@@ -270,6 +460,65 @@ export function EventProvider({ children }) {
     const id = 'evt-' + Date.now().toString(36)
     const code = 'EVT-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000)
 
+    // Ensure daily guest planning has default foodPrep, foodPacking, and batches
+    const populatedDays = (newEvent.days || []).map((d) => {
+      const guests = Number(d.expectedGuests) || 1000
+      const b1 = Math.ceil(guests * 0.35)
+      const b2 = Math.ceil(guests * 0.35)
+      const b3 = Math.max(0, guests - b1 - b2)
+
+      return {
+        ...d,
+        foodPrep: d.foodPrep || {
+          requiredMeals: guests,
+          preparedMeals: 0,
+          qualityChecked: 0,
+          rejectedMeals: 0,
+        },
+        foodPacking: d.foodPacking || {
+          requiredContainers: Math.ceil(guests / 50),
+          packedContainers: 0,
+          damagedContainers: 0,
+          containerType: 'Insulated Thermal Hot-Box (50 Pax)',
+        },
+        batches: d.batches || [
+          {
+            id: 'b-' + Date.now().toString(36) + '-1',
+            batchNumber: 'Batch 01',
+            quantity: b1,
+            preparationStatus: 'Pending',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Initial production run',
+          },
+          {
+            id: 'b-' + Date.now().toString(36) + '-2',
+            batchNumber: 'Batch 02',
+            quantity: b2,
+            preparationStatus: 'Pending',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Secondary production run',
+          },
+          {
+            id: 'b-' + Date.now().toString(36) + '-3',
+            batchNumber: 'Batch 03',
+            quantity: b3,
+            preparationStatus: 'Pending',
+            qualityCheck: 'Pending',
+            packingStatus: 'Pending',
+            readyStatus: 'Pending',
+            dispatchStatus: 'Pending',
+            notes: 'Buffer rush production run',
+          },
+        ],
+      }
+    })
+
     const fullEvent = {
       id,
       code,
@@ -277,6 +526,7 @@ export function EventProvider({ children }) {
       statusVariant: newEvent.status === 'Ongoing' ? 'success' : newEvent.status === 'Completed' ? 'silver' : 'gold',
       cateringManager: newEvent.cateringManager || 'Lead Operations Captain',
       ...newEvent,
+      days: populatedDays,
     }
 
     setEvents((prev) => [fullEvent, ...prev])
@@ -378,7 +628,7 @@ export function EventProvider({ children }) {
     )
   }, [])
 
-  // Copy Menu from one day to another day (e.g. Copy Day 1 -> Day 2, Copy Day 1 -> Day 3)
+  // Copy Menu from one day to another day
   const copyDayMenu = useCallback((eventId, sourceDayNumber, targetDayNumber) => {
     setEvents((prev) =>
       prev.map((evt) => {
@@ -390,9 +640,7 @@ export function EventProvider({ children }) {
         const targetDay = (evt.days || []).find((d) => d.dayNumber === targetDayNumber)
         const targetGuests = targetDay?.expectedGuests || sourceDay.expectedGuests || 1000
 
-        // Deep clone items with new IDs and adapt quantity to target day's expected guests
         const clonedMenu = sourceDay.menu.map((item) => {
-          // If the item quantity in source was matching the source guests, match target guests
           const shouldScale = item.quantity === sourceDay.expectedGuests || item.unit === 'Pax' || item.unit === 'Bottles'
           return {
             ...item,
@@ -414,6 +662,225 @@ export function EventProvider({ children }) {
     )
   }, [])
 
+  // ==========================================
+  // PHASE 5: FOOD PREPARATION & BATCH METHODS
+  // ==========================================
+
+  // Update Food Preparation metrics for an event day
+  const updateFoodPrep = useCallback((eventId, dayNumber, prepData) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentPrep = day.foodPrep || {
+            requiredMeals: day.expectedGuests || 0,
+            preparedMeals: 0,
+            qualityChecked: 0,
+            rejectedMeals: 0,
+          }
+          return {
+            ...day,
+            foodPrepared: prepData.preparedMeals !== undefined ? Number(prepData.preparedMeals) : day.foodPrepared,
+            foodPrep: {
+              ...currentPrep,
+              ...prepData,
+              requiredMeals: prepData.requiredMeals !== undefined ? Number(prepData.requiredMeals) : currentPrep.requiredMeals,
+              preparedMeals: prepData.preparedMeals !== undefined ? Number(prepData.preparedMeals) : currentPrep.preparedMeals,
+              qualityChecked: prepData.qualityChecked !== undefined ? Number(prepData.qualityChecked) : currentPrep.qualityChecked,
+              rejectedMeals: prepData.rejectedMeals !== undefined ? Number(prepData.rejectedMeals) : currentPrep.rejectedMeals,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Add a Batch to an event day
+  const addBatch = useCallback((eventId, dayNumber, batchData) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentBatches = day.batches || []
+          const nextIndex = currentBatches.length + 1
+          const formattedNumber = `Batch ${String(nextIndex).padStart(2, '0')}`
+
+          const newBatch = {
+            id: 'b-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5),
+            batchNumber: batchData.batchNumber || formattedNumber,
+            quantity: Number(batchData.quantity) || 1000,
+            preparationStatus: batchData.preparationStatus || 'Preparing',
+            qualityCheck: batchData.qualityCheck || 'Pending',
+            packingStatus: batchData.packingStatus || 'Pending',
+            readyStatus: batchData.readyStatus || 'Pending',
+            dispatchStatus: batchData.dispatchStatus || 'Pending',
+            notes: batchData.notes || '',
+          }
+
+          return {
+            ...day,
+            batches: [...currentBatches, newBatch],
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Update an existing Batch
+  const updateBatch = useCallback((eventId, dayNumber, batchId, updatedFields) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const updatedBatches = (day.batches || []).map((b) =>
+            b.id === batchId
+              ? {
+                  ...b,
+                  ...updatedFields,
+                  quantity: updatedFields.quantity !== undefined ? Number(updatedFields.quantity) : b.quantity,
+                }
+              : b
+          )
+
+          return {
+            ...day,
+            batches: updatedBatches,
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Delete a Batch
+  const deleteBatch = useCallback((eventId, dayNumber, batchId) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const updatedBatches = (day.batches || []).filter((b) => b.id !== batchId)
+          return {
+            ...day,
+            batches: updatedBatches,
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // ==========================================
+  // PHASE 5: FOOD PACKING METHODS
+  // ==========================================
+
+  // Update complete packing metrics
+  const updateFoodPacking = useCallback((eventId, dayNumber, packingData) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentPacking = day.foodPacking || {
+            requiredContainers: Math.ceil((day.expectedGuests || 1000) / 50),
+            packedContainers: 0,
+            damagedContainers: 0,
+            containerType: 'Insulated Thermal Hot-Box (50 Pax)',
+          }
+
+          return {
+            ...day,
+            foodPacking: {
+              ...currentPacking,
+              ...packingData,
+              requiredContainers: packingData.requiredContainers !== undefined ? Number(packingData.requiredContainers) : currentPacking.requiredContainers,
+              packedContainers: packingData.packedContainers !== undefined ? Number(packingData.packedContainers) : currentPacking.packedContainers,
+              damagedContainers: packingData.damagedContainers !== undefined ? Number(packingData.damagedContainers) : currentPacking.damagedContainers,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Fast Mobile Operation: Increment or decrement Packed Containers (+Packed, -Correction)
+  const adjustPackedContainers = useCallback((eventId, dayNumber, delta) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentPacking = day.foodPacking || {
+            requiredContainers: Math.ceil((day.expectedGuests || 1000) / 50),
+            packedContainers: 0,
+            damagedContainers: 0,
+            containerType: 'Insulated Thermal Hot-Box (50 Pax)',
+          }
+
+          const newPacked = Math.max(0, (currentPacking.packedContainers || 0) + delta)
+
+          return {
+            ...day,
+            foodPacking: {
+              ...currentPacking,
+              packedContainers: newPacked,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
+  // Fast Mobile Operation: Adjust Damaged Containers
+  const adjustDamagedContainers = useCallback((eventId, dayNumber, delta) => {
+    setEvents((prev) =>
+      prev.map((evt) => {
+        if (evt.id !== eventId) return evt
+
+        const updatedDays = (evt.days || []).map((day) => {
+          if (day.dayNumber !== dayNumber) return day
+          const currentPacking = day.foodPacking || {
+            requiredContainers: Math.ceil((day.expectedGuests || 1000) / 50),
+            packedContainers: 0,
+            damagedContainers: 0,
+            containerType: 'Insulated Thermal Hot-Box (50 Pax)',
+          }
+
+          const newDamaged = Math.max(0, (currentPacking.damagedContainers || 0) + delta)
+
+          return {
+            ...day,
+            foodPacking: {
+              ...currentPacking,
+              damagedContainers: newDamaged,
+            },
+          }
+        })
+
+        return { ...evt, days: updatedDays }
+      })
+    )
+  }, [])
+
   const value = {
     events,
     createEvent,
@@ -424,6 +891,14 @@ export function EventProvider({ children }) {
     updateDayMenuItem,
     deleteDayMenuItem,
     copyDayMenu,
+    // Phase 5 exports
+    updateFoodPrep,
+    addBatch,
+    updateBatch,
+    deleteBatch,
+    updateFoodPacking,
+    adjustPackedContainers,
+    adjustDamagedContainers,
   }
 
   return <EventContext.Provider value={value}>{children}</EventContext.Provider>
