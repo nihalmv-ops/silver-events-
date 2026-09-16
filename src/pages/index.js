@@ -1,6 +1,7 @@
 export { Dashboard } from './Dashboard'
 export { Login } from './Login'
 export { Events } from './Events'
+export { EventDetail } from './EventDetail'
 export { CateringMenu } from './CateringMenu'
 export { FoodPreparation } from './FoodPreparation'
 export { FoodPacking } from './FoodPacking'

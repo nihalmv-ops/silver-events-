@@ -6,6 +6,7 @@ import {
   Dashboard,
   Login,
   Events,
+  EventDetail,
   CateringMenu,
   FoodPreparation,
   FoodPacking,
@@ -34,6 +35,7 @@ export function AppRoutes() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="events" element={<Events />} />
+          <Route path="events/:id" element={<EventDetail />} />
           <Route path="catering-menu" element={<CateringMenu />} />
           <Route path="food-prep" element={<FoodPreparation />} />
           <Route path="food-packing" element={<FoodPacking />} />

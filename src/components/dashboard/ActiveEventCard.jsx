@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Users,
   UtensilsCrossed,
@@ -11,6 +12,7 @@ import {
   MapPin,
   Clock,
   Sparkles,
+  ArrowRight,
 } from 'lucide-react'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
@@ -19,6 +21,7 @@ import { useToast } from '../ui/ToastContext'
 
 export function ActiveEventCard({ event }) {
   const toast = useToast()
+  const navigate = useNavigate()
 
   if (!event) return null
 
@@ -101,7 +104,7 @@ export function ActiveEventCard({ event }) {
           </div>
           <div>
             <span className="text-[11px] font-semibold text-[#85a392] uppercase tracking-wider block">
-              Expected Guests
+              Expected Guests (Day 1)
             </span>
             <span className="text-xl sm:text-2xl font-bold text-white font-sans">
               {formatNumber(event.expectedGuests)}
@@ -296,9 +299,10 @@ export function ActiveEventCard({ event }) {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => toast.warning('Pending Checklist', '5 pending tasks require coordination with buffet stewards.')}
+              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+              onClick={() => navigate('/events/evt-college-3day')}
             >
-              Open Pending ({event.pendingTasksCount})
+              View 3-Day Event Details
             </Button>
           </div>
         </div>
