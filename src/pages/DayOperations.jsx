@@ -37,6 +37,7 @@ import { formatCurrency, formatNumber } from '../utils/formatters'
 import { DayClosingModal } from '../components/finance/DayClosingModal'
 import { ProductPriceModal } from '../components/finance/ProductPriceModal'
 import { Phase12ReportTemplate } from '../components/reports/Phase12ReportTemplate'
+import { downloadReportAsPdf } from '../utils/pdfExport'
 
 export function DayOperations({ defaultDay = 1 }) {
   const toast = useToast()
@@ -67,10 +68,19 @@ export function DayOperations({ defaultDay = 1 }) {
 
   const [isClosingModalOpen, setIsClosingModalOpen] = useState(false)
   const [selectedStockForEdit, setSelectedStockForEdit] = useState(null)
-  const [stockEditValues, setStockEditValues] = useState({ opening: 0, prepared: 0, sold: 0 })
+  const [stockEditValues, setStockEditValues] = useState({
+    productId: '',
+    productName: '',
+    opening: 0,
+    prepared: 0,
+    sold: 0,
+    price: 0,
+    unit: 'Portion',
+  })
   const [editingProduct, setEditingProduct] = useState(null)
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false)
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false)
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
 
   // Current Event
   const event = useMemo(() => {
@@ -85,6 +95,10 @@ export function DayOperations({ defaultDay = 1 }) {
   const dayStock = useMemo(() => {
     return getDailyStock(event?.id, activeDay)
   }, [getDailyStock, event?.id, activeDay])
+
+  const day1Stock = useMemo(() => getDailyStock(event?.id, 1), [getDailyStock, event?.id])
+  const day2Stock = useMemo(() => getDailyStock(event?.id, 2), [getDailyStock, event?.id])
+  const day3Stock = useMemo(() => getDailyStock(event?.id, 3), [getDailyStock, event?.id])
 
   // Current day financials
   const dayFin = useMemo(() => {
@@ -116,33 +130,57 @@ export function DayOperations({ defaultDay = 1 }) {
     toast.success('Sale Recorded', `Added +${qty} to ${productName} (Day ${activeDay})`)
   }
 
-  // Handle Edit Stock Modal
+  // Handle Edit Stock / Add Details Modal
   const openStockModal = (stockItem) => {
     if (dayClosing.isClosed) {
-      toast.warning('Day Locked', `Day ${activeDay} is closed. Cannot edit stock.`)
+      toast.warning('Day Locked', `Day ${activeDay} is closed. Reopen the day to modify records.`)
       return
     }
-    setSelectedStockForEdit(stockItem)
+    const item = stockItem || (dayStock && dayStock[0])
+    if (!item) return
+    setSelectedStockForEdit(item)
     setStockEditValues({
-      opening: stockItem.openingStock || 0,
-      prepared: stockItem.preparedReceived || 0,
-      sold: stockItem.soldDistributed || 0,
+      productId: item.productId,
+      productName: item.productName,
+      opening: item.openingStock || 0,
+      prepared: item.preparedReceived || item.availableStock || 0,
+      sold: item.soldDistributed || 0,
+      price: item.price || (item.productName === 'Chicken Biryani' ? 150 : item.productName === 'Popcorn' ? 30 : 15),
+      unit: item.unit || 'Portion',
     })
+  }
+
+  const handleProductSwitchInModal = (prodId) => {
+    const matching = dayStock.find((s) => s.productId === prodId)
+    if (matching) {
+      setSelectedStockForEdit(matching)
+      setStockEditValues({
+        productId: matching.productId,
+        productName: matching.productName,
+        opening: matching.openingStock || 0,
+        prepared: matching.preparedReceived || matching.availableStock || 0,
+        sold: matching.soldDistributed || 0,
+        price: matching.price || (matching.productName === 'Chicken Biryani' ? 150 : matching.productName === 'Popcorn' ? 30 : 15),
+        unit: matching.unit || 'Portion',
+      })
+    }
   }
 
   const handleSaveStock = (e) => {
     e.preventDefault()
     if (!selectedStockForEdit) return
 
-    updateDailyStock(event?.id, activeDay, selectedStockForEdit.productId, {
+    const targetProdId = stockEditValues.productId || selectedStockForEdit.productId
+    updateDailyStock(event?.id, activeDay, targetProdId, {
       openingStock: Number(stockEditValues.opening),
       preparedReceived: Number(stockEditValues.prepared),
       soldDistributed: Number(stockEditValues.sold),
+      price: Number(stockEditValues.price),
     })
 
     toast.success(
-      'Stock Updated',
-      `Stock & distribution figures saved for ${selectedStockForEdit.productName}`
+      'Details Saved',
+      `Day ${activeDay} numbers saved: ${stockEditValues.productName} updated and synchronized with PDF.`
     )
     setSelectedStockForEdit(null)
   }
@@ -156,14 +194,25 @@ export function DayOperations({ defaultDay = 1 }) {
     window.print()
   }
 
-  const handleDownloadPdf = () => {
-    toast.info(
-      'Download PDF Instructions',
-      'In your browser print dialog, select "Save as PDF" as Destination and click Save.'
-    )
-    setTimeout(() => {
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true)
+    toast.info('Generating PDF', `Preparing official Day ${activeDay} A4 document...`)
+    try {
+      const targetId = isPrintModalOpen ? 'day-modal-report-pdf-root' : 'day-operations-pdf-root'
+      const success = await downloadReportAsPdf(
+        targetId,
+        `Silver-Catering-Day-${activeDay}-Operations-Report.pdf`
+      )
+      if (success) {
+        toast.success('PDF Downloaded', `Day ${activeDay} Report downloaded directly!`)
+      }
+    } catch (e) {
+      console.error(e)
+      toast.error('Print Fallback', 'Opening print preview.')
       window.print()
-    }, 350)
+    } finally {
+      setIsGeneratingPdf(false)
+    }
   }
 
   return (
@@ -414,6 +463,15 @@ export function DayOperations({ defaultDay = 1 }) {
             </div>
             <div className="flex items-center gap-2">
               <Button
+                variant="primary"
+                size="sm"
+                onClick={() => openStockModal(dayStock[0])}
+                leftIcon={<Edit2 className="w-3.5 h-3.5" />}
+                className="bg-[#163324] text-white hover:bg-[#1f4531]"
+              >
+                Add / Edit Day {activeDay} Details
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsPrintModalOpen(true)}
@@ -422,8 +480,8 @@ export function DayOperations({ defaultDay = 1 }) {
                 Print Preview
               </Button>
               <Link to="/products">
-                <Button variant="outline" size="sm" leftIcon={<Edit2 className="w-3.5 h-3.5" />}>
-                  Edit Prices
+                <Button variant="outline" size="sm" leftIcon={<DollarSign className="w-3.5 h-3.5" />}>
+                  Prices
                 </Button>
               </Link>
             </div>
@@ -683,12 +741,17 @@ export function DayOperations({ defaultDay = 1 }) {
       {/* ========================================================================= */}
       <div className="hidden print:block a4-print-sheet">
         <Phase12ReportTemplate
+          id="day-operations-pdf-root"
           reportType={`day${activeDay}`}
           event={event}
           day1Fin={activeDay === 1 ? dayFin : day1Fin}
           day2Fin={activeDay === 2 ? dayFin : day2Fin}
           day3Fin={activeDay === 3 ? dayFin : day3Fin}
           threeDayFin={threeDayFin}
+          day1Stock={day1Stock}
+          day2Stock={day2Stock}
+          day3Stock={day3Stock}
+          stock={dayStock}
           currentDay={activeDay}
           expenses={expenses}
           tasks={tasks}
@@ -709,7 +772,7 @@ export function DayOperations({ defaultDay = 1 }) {
                   Print Day {activeDay} Operations & Financial Report
                 </h3>
                 <span className="text-[10px] text-white/70">
-                  Ready for A4 printer or PDF download
+                  Ready for instant PDF download or physical A4 printing
                 </span>
               </div>
             </div>
@@ -717,11 +780,12 @@ export function DayOperations({ defaultDay = 1 }) {
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isGeneratingPdf}
                 onClick={handleDownloadPdf}
                 leftIcon={<Download className="w-3.5 h-3.5 text-[#c29c5e]" />}
                 className="text-white border-white/30 hover:bg-white/10"
               >
-                Save as PDF
+                {isGeneratingPdf ? 'Generating PDF...' : 'Download PDF'}
               </Button>
               <Button
                 variant="primary"
@@ -745,12 +809,17 @@ export function DayOperations({ defaultDay = 1 }) {
           {/* Modal Content: The Exact Phase12ReportTemplate */}
           <div className="max-w-[900px] w-full mx-auto bg-white rounded-xl shadow-2xl p-2 sm:p-4">
             <Phase12ReportTemplate
+              id="day-modal-report-pdf-root"
               reportType={`day${activeDay}`}
               event={event}
               day1Fin={activeDay === 1 ? dayFin : day1Fin}
               day2Fin={activeDay === 2 ? dayFin : day2Fin}
               day3Fin={activeDay === 3 ? dayFin : day3Fin}
               threeDayFin={threeDayFin}
+              day1Stock={day1Stock}
+              day2Stock={day2Stock}
+              day3Stock={day3Stock}
+              stock={dayStock}
               currentDay={activeDay}
               expenses={expenses}
               tasks={tasks}
@@ -777,36 +846,88 @@ export function DayOperations({ defaultDay = 1 }) {
         currentDayNumber={activeDay}
       />
 
-      {/* Edit Stock Register Modal */}
+      {/* Edit Stock / Add Details Modal */}
       {selectedStockForEdit && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs print:hidden">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-5 border border-[#e2e8f0]">
-            <h3 className="text-base font-black text-[#0f172a] mb-1">
-              Adjust Stock — {selectedStockForEdit.productName} (Day {activeDay})
-            </h3>
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs print:hidden">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-5 border border-[#e2e8f0]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-base font-black text-[#0f172a]">
+                Day {activeDay} Details & Stock Editor
+              </h3>
+              <button
+                type="button"
+                onClick={() => setSelectedStockForEdit(null)}
+                className="p-1 rounded text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
             <p className="text-xs text-[#64748b] mb-4">
-              Update opening, prepared/received, or distributed counts. System will recalculate available and remaining buffers automatically.
+              Enter your exact Day {activeDay} product numbers below. All figures synchronize automatically with the live dashboard and A4 PDF reports.
             </p>
 
+            {/* Product Switch Tabs */}
+            <div className="flex items-center gap-1.5 p-1 bg-[#f1f5f9] rounded-lg mb-4 text-xs">
+              {dayStock.map((item) => {
+                const isSelected =
+                  stockEditValues.productId === item.productId ||
+                  (!stockEditValues.productId && selectedStockForEdit.productId === item.productId)
+                return (
+                  <button
+                    key={item.productId}
+                    type="button"
+                    onClick={() => handleProductSwitchInModal(item.productId)}
+                    className={`flex-1 py-1.5 px-2 rounded-md font-bold text-center transition-all ${
+                      isSelected
+                        ? 'bg-white text-[#163324] shadow-xs'
+                        : 'text-[#64748b] hover:text-[#0f172a]'
+                    }`}
+                  >
+                    {item.productName}
+                  </button>
+                )
+              })}
+            </div>
+
             <form onSubmit={handleSaveStock} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-semibold text-[#334155] mb-1">
-                  Opening Stock ({selectedStockForEdit.unit})
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={stockEditValues.opening}
-                  onChange={(e) =>
-                    setStockEditValues({ ...stockEditValues, opening: e.target.value })
-                  }
-                  className="w-full px-3 py-2 text-sm border border-[#cbd5e1] rounded-lg font-mono focus:ring-2 focus:ring-[#163324] focus:outline-none"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#334155] mb-1">
+                    Selling Price (₹)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-[#64748b] font-bold text-sm">₹</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={stockEditValues.price}
+                      onChange={(e) =>
+                        setStockEditValues({ ...stockEditValues, price: e.target.value })
+                      }
+                      className="w-full pl-7 pr-3 py-2 text-sm border border-[#cbd5e1] rounded-lg font-mono font-bold text-[#163324] focus:ring-2 focus:ring-[#163324] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#334155] mb-1">
+                    Opening Stock ({stockEditValues.unit})
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={stockEditValues.opening}
+                    onChange={(e) =>
+                      setStockEditValues({ ...stockEditValues, opening: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-[#cbd5e1] rounded-lg font-mono focus:ring-2 focus:ring-[#163324] focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-[#334155] mb-1">
-                  Prepared / Received Quantity
+                  Prepared / Available Quantity
                 </label>
                 <input
                   type="number"
@@ -815,7 +936,7 @@ export function DayOperations({ defaultDay = 1 }) {
                   onChange={(e) =>
                     setStockEditValues({ ...stockEditValues, prepared: e.target.value })
                   }
-                  className="w-full px-3 py-2 text-sm border border-[#cbd5e1] rounded-lg font-mono focus:ring-2 focus:ring-[#163324] focus:outline-none font-bold text-[#163324]"
+                  className="w-full px-3 py-2 text-sm border border-[#cbd5e1] rounded-lg font-mono focus:ring-2 focus:ring-[#163324] focus:outline-none font-bold text-[#0f172a]"
                 />
               </div>
 
@@ -830,34 +951,34 @@ export function DayOperations({ defaultDay = 1 }) {
                   onChange={(e) =>
                     setStockEditValues({ ...stockEditValues, sold: e.target.value })
                   }
-                  className="w-full px-3 py-2 text-sm border border-[#cbd5e1] rounded-lg font-mono focus:ring-2 focus:ring-[#163324] focus:outline-none font-bold text-[#163324]"
+                  className="w-full px-3 py-2 text-sm border border-[#cbd5e1] rounded-lg font-mono focus:ring-2 focus:ring-[#163324] focus:outline-none font-bold text-emerald-800"
                 />
               </div>
 
-              <div className="p-3 bg-[#f8fafc] rounded-lg text-xs space-y-1 border border-[#e2e8f0]">
+              <div className="p-3 bg-[#f8fafc] rounded-lg text-xs space-y-1.5 border border-[#e2e8f0]">
                 <div className="flex justify-between">
-                  <span>Available Stock:</span>
-                  <strong className="font-mono">
-                    {Number(stockEditValues.opening || 0) + Number(stockEditValues.prepared || 0)}
+                  <span className="text-[#64748b]">Total Available Stock:</span>
+                  <strong className="font-mono text-[#0f172a]">
+                    {Number(stockEditValues.opening || 0) + Number(stockEditValues.prepared || 0)} {stockEditValues.unit}
                   </strong>
                 </div>
                 <div className="flex justify-between">
-                  <span>Remaining Buffer:</span>
+                  <span className="text-[#64748b]">Remaining Buffer:</span>
                   <strong className="font-mono text-amber-700">
                     {Math.max(
                       0,
                       Number(stockEditValues.opening || 0) +
                         Number(stockEditValues.prepared || 0) -
                         Number(stockEditValues.sold || 0)
-                    )}
+                    )} {stockEditValues.unit}
                   </strong>
                 </div>
-                <div className="flex justify-between pt-1 border-t border-[#e2e8f0]">
-                  <span>Calculated Income (₹{selectedStockForEdit.price}/unit):</span>
-                  <strong className="font-mono text-[#163324]">
+                <div className="flex justify-between pt-1.5 border-t border-[#e2e8f0]">
+                  <span className="font-semibold text-[#163324]">Portion Income:</span>
+                  <strong className="font-mono text-base text-[#163324]">
                     ₹
                     {(
-                      Number(stockEditValues.sold || 0) * selectedStockForEdit.price
+                      Number(stockEditValues.sold || 0) * Number(stockEditValues.price || 0)
                     ).toLocaleString('en-IN')}
                   </strong>
                 </div>
@@ -872,8 +993,8 @@ export function DayOperations({ defaultDay = 1 }) {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="sm">
-                  Save Stock Numbers
+                <Button type="submit" variant="primary" size="sm" className="bg-[#163324] text-white">
+                  Save Day {activeDay} Details
                 </Button>
               </div>
             </form>

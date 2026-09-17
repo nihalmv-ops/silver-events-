@@ -85,13 +85,16 @@ export const PHASE12_REPORTS = [
   },
 ]
 
+import { downloadReportAsPdf } from '../utils/pdfExport'
+
 export function PrintReports() {
   const toast = useToast()
   const [searchParams] = useSearchParams()
   const { events, activeEventId } = useEvents()
-  const { getDailyFinancials, getThreeDayFinancials } = useFinance()
+  const { getDailyFinancials, getThreeDayFinancials, getDailyStock } = useFinance()
   const { expenses } = useExpenses()
   const { tasks } = useTasks()
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
 
   // Parse search params: support ?report=day1 or ?day=1
   const reportQuery =
@@ -109,6 +112,10 @@ export function PrintReports() {
   const day2Fin = useMemo(() => getDailyFinancials(selectedEventId, 2), [getDailyFinancials, selectedEventId])
   const day3Fin = useMemo(() => getDailyFinancials(selectedEventId, 3), [getDailyFinancials, selectedEventId])
   const threeDayFin = useMemo(() => getThreeDayFinancials(selectedEventId), [getThreeDayFinancials, selectedEventId])
+
+  const day1Stock = useMemo(() => getDailyStock(selectedEventId, 1), [getDailyStock, selectedEventId])
+  const day2Stock = useMemo(() => getDailyStock(selectedEventId, 2), [getDailyStock, selectedEventId])
+  const day3Stock = useMemo(() => getDailyStock(selectedEventId, 3), [getDailyStock, selectedEventId])
 
   // Auto-print if query param autoprint=true
   useEffect(() => {
@@ -137,18 +144,31 @@ export function PrintReports() {
     setActiveReportId(reportId)
     setTimeout(() => {
       window.print()
-    }, 400)
+    }, 350)
   }
 
-  const handleDownloadPdf = (reportId) => {
-    setActiveReportId(reportId)
-    toast.info(
-      'Download PDF Instructions',
-      'In your browser print preview window, change "Destination" to "Save as PDF" and click "Save".'
-    )
-    setTimeout(() => {
+  const handleDownloadPdf = async (reportId) => {
+    const targetReport = reportId || activeReportId || 'day1'
+    if (reportId && activeReportId !== reportId) {
+      setActiveReportId(reportId)
+    }
+    setIsGeneratingPdf(true)
+    toast.info('Generating PDF', `Preparing official A4 document for ${targetReport}...`)
+    try {
+      const success = await downloadReportAsPdf(
+        'print-reports-pdf-root',
+        `Silver-Catering-${targetReport.toUpperCase()}-Report.pdf`
+      )
+      if (success) {
+        toast.success('PDF Downloaded', 'Report downloaded directly to your computer!')
+      }
+    } catch (e) {
+      console.error(e)
+      toast.error('Print Fallback', 'Opening print preview.')
       window.print()
-    }, 450)
+    } finally {
+      setIsGeneratingPdf(false)
+    }
   }
 
   return (
@@ -247,11 +267,12 @@ export function PrintReports() {
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isGeneratingPdf}
                 leftIcon={<Download className="w-3.5 h-3.5 text-[#c29c5e]" />}
                 onClick={() => handleDownloadPdf(activeReportId)}
                 className="text-white border-white/30 hover:bg-white/10"
               >
-                Download PDF
+                {isGeneratingPdf ? 'Generating PDF...' : 'Download PDF'}
               </Button>
               <Button
                 variant="primary"
@@ -267,19 +288,24 @@ export function PrintReports() {
 
           {/* Render Actual A4 Document */}
           <Phase12ReportTemplate
+            id="print-reports-pdf-root"
             reportType={activeReportId}
             event={currentEvent}
             day1Fin={day1Fin}
             day2Fin={day2Fin}
             day3Fin={day3Fin}
             threeDayFin={threeDayFin}
+            day1Stock={day1Stock}
+            day2Stock={day2Stock}
+            day3Stock={day3Stock}
+            stock={activeReportId === 'day1' ? day1Stock : activeReportId === 'day2' ? day2Stock : day3Stock}
             expenses={expenses}
             tasks={tasks}
           />
         </div>
       ) : (
         /* REPORTS DIRECTORY / GRID */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 print:hidden">
           {PHASE12_REPORTS.map((report) => {
             const Icon = report.icon
             return (
@@ -352,12 +378,17 @@ export function PrintReports() {
       {!activeReportId && (
         <div className="hidden print:block">
           <Phase12ReportTemplate
+            id="print-reports-fallback-pdf-root"
             reportType="day1"
             event={currentEvent}
             day1Fin={day1Fin}
             day2Fin={day2Fin}
             day3Fin={day3Fin}
             threeDayFin={threeDayFin}
+            day1Stock={day1Stock}
+            day2Stock={day2Stock}
+            day3Stock={day3Stock}
+            stock={day1Stock}
             expenses={expenses}
             tasks={tasks}
           />

@@ -830,8 +830,10 @@ export function FinanceProvider({ children }) {
             updatedFields.soldDistributed !== undefined
               ? Number(updatedFields.soldDistributed)
               : Number(item.soldDistributed) || 0
-          const remaining = Math.max(0, available - sold)
-          const price = Number(item.price) || 0
+          const price =
+            updatedFields.price !== undefined
+              ? Number(updatedFields.price)
+              : Number(item.price) || 0
           const income = sold * price
 
           return {
@@ -842,14 +844,14 @@ export function FinanceProvider({ children }) {
             availableStock: available,
             soldDistributed: sold,
             remainingStock: remaining,
+            price: price,
             income: income,
           }
         })
       )
 
-      // Sync with sales if soldDistributed changed
-      if (updatedFields.soldDistributed !== undefined) {
-        const soldQty = Number(updatedFields.soldDistributed)
+      // Sync with sales if soldDistributed or price changed
+      if (updatedFields.soldDistributed !== undefined || updatedFields.price !== undefined) {
         setSales((prev) =>
           prev.map((s) => {
             if (
@@ -859,10 +861,20 @@ export function FinanceProvider({ children }) {
             ) {
               return s
             }
+            const soldQty =
+              updatedFields.soldDistributed !== undefined
+                ? Number(updatedFields.soldDistributed)
+                : Number(s.quantity) || 0
+            const effectivePrice =
+              updatedFields.price !== undefined
+                ? Number(updatedFields.price)
+                : Number(s.price) || 0
+
             return {
               ...s,
               quantity: soldQty,
-              total: soldQty * (Number(s.price) || 0),
+              price: effectivePrice,
+              total: soldQty * effectivePrice,
             }
           })
         )

@@ -59,13 +59,13 @@
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm 12mm 10mm 12mm;
+    margin: 8mm 10mm 8mm 10mm;
   }
 
   body {
     background: #ffffff !important;
     color: #0f172a !important;
-    font-size: 10pt;
+    font-size: 9.5pt;
     line-height: 1.35;
   }
 
@@ -82,17 +82,25 @@
     display: none !important;
   }
 
-  /* Expand all layout ancestors to avoid clipped overflow */
+  /* Convert layout ancestors from flex/fixed heights to static blocks so multi-page documents paginate naturally */
   html,
   body,
   #root,
+  #root > div,
   .h-screen,
   .overflow-hidden,
   .overflow-y-auto,
+  .flex,
+  .flex-col,
+  .flex-1,
   main {
+    display: block !important;
     overflow: visible !important;
     height: auto !important;
     min-height: auto !important;
+    max-height: none !important;
+    position: static !important;
+    float: none !important;
     padding: 0 !important;
     margin: 0 !important;
     background: #ffffff !important;
@@ -115,6 +123,25 @@
     box-shadow: none !important;
     border: none !important;
     background: #ffffff !important;
+  }
+
+  /* Table formatting for clean multi-page pagination */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tfoot {
+    display: table-footer-group !important;
   }
 
   /* Page break controls */

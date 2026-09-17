@@ -4,12 +4,17 @@ import { ReportFooter } from './ReportFooter'
 import { formatCurrency, formatNumber } from '../../utils/formatters'
 
 export function Phase12ReportTemplate({
+  id = 'printable-phase12-report',
   reportType = 'day1', // 'day1' | 'day2' | 'day3' | 'complete-3day' | 'financial-summary' | 'expenses' | 'sales-income'
   event,
   day1Fin,
   day2Fin,
   day3Fin,
   threeDayFin,
+  day1Stock,
+  day2Stock,
+  day3Stock,
+  stock,
   expenses = [],
   tasks = [],
   currentDay = 1,
@@ -34,9 +39,40 @@ export function Phase12ReportTemplate({
   const targetDayFin =
     activeDayNum === 1 ? day1Fin : activeDayNum === 2 ? day2Fin : day3Fin
 
-  // Guaranteed baseline product figures to ensure Day 1 details never fail to render or print
+  // Dynamic product figures derived from live stock data with fallback to guaranteed baseline
   const productRows = useMemo(() => {
     if (isSingleDay) {
+      const activeStock =
+        stock && stock.length > 0
+          ? stock
+          : activeDayNum === 1
+          ? (day1Stock || stock)
+          : activeDayNum === 2
+          ? day2Stock
+          : day3Stock
+
+      if (activeStock && activeStock.length > 0) {
+        return activeStock.map((stk) => {
+          const prep = Number(stk.preparedReceived) || Number(stk.availableStock) || 0
+          const sold = Number(stk.soldDistributed) || 0
+          const rem =
+            stk.remainingStock !== undefined
+              ? Number(stk.remainingStock)
+              : Math.max(0, prep - sold)
+          const price = Number(stk.price) || 0
+          const income = Number(stk.income) || sold * price
+          return {
+            name: stk.productName,
+            unit: stk.unit || 'Portion / Box',
+            price,
+            prep,
+            sold,
+            rem,
+            income,
+          }
+        })
+      }
+
       if (activeDayNum === 1) {
         return [
           { name: 'Chicken Biryani', unit: 'Portion / Box', price: 150, prep: 5000, sold: 4700, rem: 300, income: 705000 },
@@ -58,71 +94,80 @@ export function Phase12ReportTemplate({
       ]
     }
 
+    // 3-Day Consolidation
+    if (day1Stock && day2Stock && day3Stock && day1Stock.length > 0) {
+      const allStock = [...day1Stock, ...day2Stock, ...day3Stock]
+      const prodNames = ['Chicken Biryani', 'Popcorn', 'Water Bottle']
+      return prodNames.map((name) => {
+        const matching = allStock.filter(
+          (s) => s.productName?.toLowerCase() === name.toLowerCase()
+        )
+        const prep = matching.reduce((sum, s) => sum + (Number(s.preparedReceived) || Number(s.availableStock) || 0), 0)
+        const sold = matching.reduce((sum, s) => sum + (Number(s.soldDistributed) || 0), 0)
+        const rem = matching.reduce((sum, s) => sum + (Number(s.remainingStock) || 0), 0)
+        const income = matching.reduce((sum, s) => sum + (Number(s.income) || (Number(s.soldDistributed || 0) * Number(s.price || 0))), 0)
+        const price = matching[0] ? Number(matching[0].price) : (name === 'Chicken Biryani' ? 150 : name === 'Popcorn' ? 30 : 15)
+        const unit = matching[0]?.unit || (name === 'Water Bottle' ? '250ml Sealed Bottle' : name === 'Popcorn' ? 'Tub / Cone' : 'Portion / Box')
+        return { name, unit, price, prep, sold, rem, income }
+      })
+    }
+
     return [
       { name: 'Chicken Biryani', unit: 'Portion / Box', price: 150, prep: 15200, sold: 14500, rem: 700, income: 2175000 },
       { name: 'Popcorn', unit: 'Tub / Cone', price: 30, prep: 6200, sold: 5700, rem: 500, income: 171000 },
       { name: 'Water Bottle', unit: '250ml Sealed Bottle', price: 15, prep: 15200, sold: 14000, rem: 1200, income: 210000 },
     ]
-  }, [isSingleDay, activeDayNum])
+  }, [isSingleDay, activeDayNum, stock, day1Stock, day2Stock, day3Stock])
 
-  // Baseline Sales List with foolproof fallback
+  // Sales List dynamically derived from live sales or live stock
   const salesList = useMemo(() => {
     let list = []
     if (isSingleDay) {
-      list = (targetDayFin?.sales && targetDayFin.sales.length > 0) ? targetDayFin.sales : []
+      if (targetDayFin?.sales && targetDayFin.sales.length > 0) {
+        list = targetDayFin.sales
+      } else if (productRows && productRows.length > 0) {
+        list = productRows.map((p, idx) => ({
+          id: `sale-dyn-${activeDayNum}-${idx}`,
+          productName: p.name,
+          quantity: p.sold,
+          price: p.price,
+          total: p.income,
+          dayNumber: activeDayNum,
+        }))
+      }
     } else {
-      list = (threeDayFin?.sales && threeDayFin.sales.length > 0)
-        ? threeDayFin.sales
-        : [...(day1Fin?.sales || []), ...(day2Fin?.sales || []), ...(day3Fin?.sales || [])]
-    }
-
-    if (list.length > 0) return list
-
-    // Fallback if state is empty so Day 1 prints with complete accuracy
-    if (isSingleDay) {
-      if (activeDayNum === 1) {
-        return [
-          { id: 'sale-d1-1', productName: 'Chicken Biryani', quantity: 4700, price: 150, total: 705000, dayNumber: 1 },
-          { id: 'sale-d1-2', productName: 'Popcorn', quantity: 1800, price: 30, total: 54000, dayNumber: 1 },
-          { id: 'sale-d1-3', productName: 'Water Bottle', quantity: 4500, price: 15, total: 67500, dayNumber: 1 },
-        ]
+      if (threeDayFin?.sales && threeDayFin.sales.length > 0) {
+        list = threeDayFin.sales
+      } else {
+        const combined = [...(day1Fin?.sales || []), ...(day2Fin?.sales || []), ...(day3Fin?.sales || [])]
+        if (combined.length > 0) {
+          list = combined
+        } else {
+          list = productRows.map((p, idx) => ({
+            id: `sale-3d-dyn-${idx}`,
+            productName: p.name,
+            quantity: p.sold,
+            price: p.price,
+            total: p.income,
+            dayNumber: 'All',
+          }))
+        }
       }
-      if (activeDayNum === 2) {
-        return [
-          { id: 'sale-d2-1', productName: 'Chicken Biryani', quantity: 5000, price: 150, total: 750000, dayNumber: 2 },
-          { id: 'sale-d2-2', productName: 'Popcorn', quantity: 2000, price: 30, total: 60000, dayNumber: 2 },
-          { id: 'sale-d2-3', productName: 'Water Bottle', quantity: 4800, price: 15, total: 72000, dayNumber: 2 },
-        ]
-      }
-      return [
-        { id: 'sale-d3-1', productName: 'Chicken Biryani', quantity: 4800, price: 150, total: 720000, dayNumber: 3 },
-        { id: 'sale-d3-2', productName: 'Popcorn', quantity: 1900, price: 30, total: 57000, dayNumber: 3 },
-        { id: 'sale-d3-3', productName: 'Water Bottle', quantity: 4700, price: 15, total: 70500, dayNumber: 3 },
-      ]
     }
-
-    return [
-      { id: 'sale-d1-1', productName: 'Chicken Biryani', quantity: 4700, price: 150, total: 705000, dayNumber: 1 },
-      { id: 'sale-d1-2', productName: 'Popcorn', quantity: 1800, price: 30, total: 54000, dayNumber: 1 },
-      { id: 'sale-d1-3', productName: 'Water Bottle', quantity: 4500, price: 15, total: 67500, dayNumber: 1 },
-      { id: 'sale-d2-1', productName: 'Chicken Biryani', quantity: 5000, price: 150, total: 750000, dayNumber: 2 },
-      { id: 'sale-d2-2', productName: 'Popcorn', quantity: 2000, price: 30, total: 60000, dayNumber: 2 },
-      { id: 'sale-d2-3', productName: 'Water Bottle', quantity: 4800, price: 15, total: 72000, dayNumber: 2 },
-      { id: 'sale-d3-1', productName: 'Chicken Biryani', quantity: 4800, price: 150, total: 720000, dayNumber: 3 },
-      { id: 'sale-d3-2', productName: 'Popcorn', quantity: 1900, price: 30, total: 57000, dayNumber: 3 },
-      { id: 'sale-d3-3', productName: 'Water Bottle', quantity: 4700, price: 15, total: 70500, dayNumber: 3 },
-    ]
-  }, [isSingleDay, activeDayNum, targetDayFin, threeDayFin, day1Fin, day2Fin, day3Fin])
+    return list
+  }, [isSingleDay, activeDayNum, targetDayFin, threeDayFin, day1Fin, day2Fin, day3Fin, productRows])
 
   // Total Sales Amount
   const totalSalesAmount = useMemo(() => {
+    const fromProducts = productRows.reduce((sum, p) => sum + (Number(p.income) || 0), 0)
+    if (fromProducts > 0) return fromProducts
     const calculated = salesList.reduce((sum, s) => sum + (Number(s.total) || 0), 0)
     if (calculated > 0) return calculated
     if (isSingleDay) {
       return activeDayNum === 1 ? 826500 : activeDayNum === 2 ? 882000 : 847500
     }
     return 2556000
-  }, [salesList, isSingleDay, activeDayNum])
+  }, [productRows, salesList, isSingleDay, activeDayNum])
 
   // Baseline Expense List with foolproof fallback
   const expenseList = useMemo(() => {
@@ -205,7 +250,10 @@ export function Phase12ReportTemplate({
   }
 
   return (
-    <div className="a4-print-sheet bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-[#cbd5e1] max-w-[900px] mx-auto text-xs text-[#0f172a] print:shadow-none print:border-none print:p-0 print:m-0">
+    <div
+      id={id}
+      className="a4-print-sheet bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-[#cbd5e1] max-w-[900px] mx-auto text-xs text-[#0f172a] print:shadow-none print:border-none print:p-0 print:m-0"
+    >
       {/* 1. Silver Catering Standard Header */}
       <ReportHeader
         reportTitle={currentMeta.title}
